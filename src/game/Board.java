@@ -1,6 +1,5 @@
 package game;
 
-import players.MiniMax;
 import players.Player;
 
 import java.util.HashSet;
@@ -22,6 +21,18 @@ public class Board {
             0,1,1,1,1,1,1,0,0,
             0,0,1,1,1,1,1,0,0,
     };
+    // distances to the edge of the board
+    public static final byte[] distances = {
+            0,0,0,0,0,0,0,0,0,
+            0,0,1,1,1,1,0,0,0,
+            0,0,1,2,2,2,1,0,0,
+            0,1,2,3,3,2,1,0,0,
+            0,1,2,3,4,3,2,1,0,
+            0,1,2,3,3,2,1,0,0,
+            0,0,1,2,2,2,1,0,0,
+            0,0,1,1,1,1,0,0,0,
+            0,0,0,0,0,0,0,0,0,
+    };
 
     // number of entries in the byte array cells
     public static final int numberOfCells = 81;
@@ -30,7 +41,7 @@ public class Board {
     // row major order used for checking in what row a field is
     public static final int rowMajorOrder = 9;
     // the actual board, containing the pieces
-    public static Field[] board = new Field[numberOfCells];
+    public Field[] board = new Field[numberOfCells];
     // colors of the players, p1 = white, p2 = black, p3 = red, 0 means a free cell
     public static final int FREE = 0, WHITE = 1, BLACK = 2, RED = 3;
     // turn of the game
@@ -41,7 +52,7 @@ public class Board {
     public int numberOfPlayersAlive;
     public boolean[] playersAlive = new boolean[]{false, false, false, false};
     // flag for game over
-    public boolean gameOver;
+    public int gameWon = FREE;
     // players
     Player[] players;
 
@@ -58,14 +69,12 @@ public class Board {
     public static final int numberOfDirections = 6;
 
     // list of moves that have been made so far
-    public static int numberOfMovesMade = 0;
+    public int numberOfMovesMade = 0;
     public int[] movesMade;
     public HashSet<Integer>[] forcedMovesList;
 
     public Board() {
         initBoard();
-        setPlayer(WHITE, new MiniMax());
-        doTurn();
     }
 
     // initializes an empty board, assign neighboring fields for easy lookup
@@ -109,7 +118,7 @@ public class Board {
 
             // some miscellaneous stuff
             turn = WHITE;
-            gameOver = false;
+            gameWon = FREE;
             winningLine.clear();
             losingLine.clear();
             forcedMoves.clear();
@@ -170,8 +179,8 @@ public class Board {
 
     public void doMove(int i) {
         // check if the move is allowed
-        if (!getAllowedMoves().contains(i)) {
-            System.err.println("Move not allowed");
+        if (!getAllowedMoveSet().contains(i)) {
+            System.err.println("Move " + i + " not allowed on board\n" + this.toString());
             return;
         }
 
@@ -192,14 +201,50 @@ public class Board {
         advanceTurn();
     }
 
-    public void undoMove() {
+//    public void undoMove() {
+//        if (numberOfMovesMade == 0)
+//            return;
+//        numberOfMovesMade--;
+//        int position = movesMade[numberOfMovesMade];
+//        board[position].piece = FREE;
+//        freeFields.add(position);
+//        forcedMoves = forcedMovesList[numberOfMovesMade];
+//        rewindTurn();
+//    }
 
+    public void undoMoveWithCheck(int i) {
+        if (numberOfMovesMade == 0)
+            return;
+        if (movesMade[numberOfMovesMade - 1] != i) {
+            System.err.println("Trying to undo the wrong move " + movesMade[numberOfMovesMade - 1] + " != " + i);
+        }
+        numberOfMovesMade--;
+        int position = movesMade[numberOfMovesMade];
+
+        if (!playersAlive[board[position].piece]) {
+            playersAlive[board[position].piece] = true;
+            numberOfPlayersAlive++;
+        }
+        board[position].piece = FREE;
+        freeFields.add(position);
+        forcedMoves = forcedMovesList[numberOfMovesMade];
+        rewindTurn();
     }
 
     public void doTurn() {
         if (players[turn] != null) {
-            doMove(players[turn].doMove(this));
+            doMove(players[turn].doMove(this.copy()));
         }
+    }
+
+    public void rewindTurn() {
+        turn = turn - 1;
+        if (turn == 0) {
+            turn = numberOfPlayers;
+        }
+        gameWon = FREE;
+        losingLine.clear();
+        winningLine.clear();
     }
 
     public void advanceTurn() {
@@ -211,7 +256,6 @@ public class Board {
                 return;
             }
         }
-        doTurn();
     }
 
     private HashSet<Integer> freeFields = new HashSet<Integer>();
@@ -269,13 +313,12 @@ public class Board {
 
     // kills the player
     public void killPlayer(int piece) {
-        if (gameOver) {
+        if (isGameOver()) {
             return;
         }
         if (playersAlive[piece]) {
             playersAlive[piece] = false;
             numberOfPlayersAlive--;
-            System.out.println("Player " + piece + " killed!");
             if (numberOfPlayersAlive == 1) {
                 gameWon();
             }
@@ -285,26 +328,47 @@ public class Board {
     public void gameWon(int piece) {
         // kill the other players
         killPlayer((piece % 3) + 1);
-        killPlayer((piece % 3) + 2);
+        killPlayer(((piece + 1) % 3) + 1);
         gameWon();
     }
 
     public void gameWon() {
-        gameOver = true;
         if (playersAlive[WHITE]) {
-            System.out.println("WHITE won");
+            gameWon = WHITE;
         } else if (playersAlive[BLACK]) {
-            System.out.println("BLACK won");
+            gameWon = BLACK;
         } else if (playersAlive[RED]) {
-            System.out.println("RED won");
+            gameWon = RED;
         }
     }
 
-    public HashSet<Integer> getAllowedMoves() {
-        if (gameOver) {
+    public boolean isGameOver() {
+        return gameWon != FREE;
+    }
+
+    public HashSet<Integer> getAllowedMoveSet() {
+        if (isGameOver()) {
             return new HashSet<Integer>();
         }
         return forcedMoves.size() == 0 ? freeFields : forcedMoves;
+    }
+
+    public int[] getAllowedMoves() {
+        if (isGameOver()) {
+            return new int[]{};
+        }
+        if (forcedMoves.size() == 0) {
+            return toIntArray(freeFields);
+        } else {
+            return toIntArray(forcedMoves);
+        }
+    }
+
+    public int[] toIntArray(HashSet<Integer> set) {
+        int[] a = new int[set.size()];
+        int i = 0;
+        for (Integer val : set) a[i++] = val;
+        return a;
     }
 
     public void setPlayer(int piece, Player player) {
@@ -315,7 +379,39 @@ public class Board {
         }
     }
 
+    public Board copy() {
+        Board copy = new Board();
+        if (numberOfMovesMade == 0) {
+            return copy;
+        }
+        for (int i = 0; i < numberOfMovesMade - 1; i++) {
+            System.out.print("[" + movesMade[i] + "] ");
+            copy.board[movesMade[i]].piece = board[movesMade[i]].piece;
+            copy.freeFields.remove(movesMade[i]);
+            copy.numberOfMovesMade++;
+            copy.advanceTurn();
+        }
+        copy.doMove(movesMade[numberOfMovesMade - 1]);
+        System.out.println("[" + movesMade[numberOfMovesMade - 1] + "] ");
+        return copy;
+    }
+
     public boolean isHumanMove() {
         return players[turn] == null;
+    }
+
+    public String toString() {
+        StringBuffer stringBuffer = new StringBuffer();
+        for (int i = 0; i < numberOfCells; i++) {
+            if (cells[i] == 0) {
+                stringBuffer.append(".");
+            } else {
+                stringBuffer.append(board[i].piece);
+            }
+            if ((i + 1) % rowMajorOrder == 0) {
+                stringBuffer.append("\n");
+            }
+        }
+        return stringBuffer.toString();
     }
 }

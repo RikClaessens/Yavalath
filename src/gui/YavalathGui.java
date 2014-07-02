@@ -12,16 +12,16 @@ public class YavalathGui extends JFrame implements MouseListener {
         contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         setContentPane(contentPane);
-        final YavalathPanel yalathPanel = new YavalathPanel();
-        yalathPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        yalathPanel.setLayout(new BorderLayout(0, 0));
+        final YavalathPanel yavalathPanel = new YavalathPanel();
+        yavalathPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        yavalathPanel.setLayout(new BorderLayout(0, 0));
 
         JPanel textPanel = new TextPanel();
         textPanel.setAlignmentX(Component.RIGHT_ALIGNMENT);
 
 
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
-        contentPane.add(yalathPanel);
+        contentPane.add(yavalathPanel);
         contentPane.add(textPanel);
 
         JMenuBar menuBar = new JMenuBar();
@@ -71,27 +71,25 @@ public class YavalathGui extends JFrame implements MouseListener {
         p2Menu.add(rdbtnmntmMinimaxtt_1);
         buttonGroup_1.add(rdbtnmntmMinimaxtt_1);
 
-        JButton btnNewButton = new JButton("Undo");
+        JButton btnUndoButton = new JButton("Undo");
 
-        menuBar.add(btnNewButton);
+        menuBar.add(btnUndoButton);
 
         final JButton btnPause = new JButton("Pause");
         btnPause.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
-//                yalathPanel.pause(btnPause.getText() == "Pause" ? true : false);
+//                yavalathPanel.pause(btnPause.getText() == "Pause" ? true : false);
 //                btnPause.setText(btnPause.getText() == "Pause" ? "Continue" : "Pause");
 //                requestFocus();
 //                repaint();
             }
         });
 
-        btnNewButton.addActionListener(new ActionListener() {
+        btnUndoButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
-//                btnPause.setText("Continue");
-//                yalathPanel.undo(); //getBoard().undoFromGUI();
-//                yalathPanel.pause(true);
-//                requestFocus();
-//                repaint();
+                yavalathPanel.undoMove();
+                requestFocus();
+                repaint();
             }
         });
         menuBar.add(btnPause);
@@ -100,7 +98,7 @@ public class YavalathGui extends JFrame implements MouseListener {
 
         mntmNewGame.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
-                yalathPanel.newGame();
+                yavalathPanel.newGame();
             }
         });
         setFocusable(true);
@@ -112,7 +110,9 @@ public class YavalathGui extends JFrame implements MouseListener {
 
             @Override
             public void keyReleased(KeyEvent e) {
-//                if (e.getKeyChar() == 'n')
+                if (e.getKeyChar() == 'n') {
+                    yavalathPanel.newGame();
+                }
 //                {
 //                    String player1Name = "Human";
 //                    String player2Name = "Human";
@@ -138,17 +138,17 @@ public class YavalathGui extends JFrame implements MouseListener {
 //                        player2Name = "MinimaxTT";
 //                    }
 //
-//                    yalathPanel.newGame(player1, player2);
+//                    yavalathPanel.newGame(player1, player2);
 //                    TextPanel.splitLine();
 //                    TextPanel.log("New game: " + player1Name + " vs. " + player2Name);
 //                }
 //                else if (e.getKeyChar() == 'p' && btnPause.getText() == "Pause") {
-//                    yalathPanel.pause(true);
+//                    yavalathPanel.pause(true);
 //                    btnPause.setText(btnPause.getText() == "Pause" ? "Continue" : "Pause");
 //                    repaint();
 //                }
 //                else if (e.getKeyChar() == 'c' && btnPause.getText() == "Continue") {
-//                    yalathPanel.pause(false);
+//                    yavalathPanel.pause(false);
 //                    btnPause.setText(btnPause.getText() == "Pause" ? "Continue" : "Pause");
 //                    repaint();
 //                }

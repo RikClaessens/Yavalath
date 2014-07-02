@@ -4,6 +4,7 @@ import com.rush.HexGridCell;
 import game.Board;
 import game.Field;
 import game.RowOfFour;
+import players.MiniMax;
 
 import javax.swing.*;
 import java.awt.*;
@@ -74,12 +75,16 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
     }
 
     public void newGame() {
+        board = new Board();
         board.initBoard();
+        board.setPlayer(board.WHITE, new MiniMax(board.WHITE));
+        board.doTurn();
         repaint();
     }
 
     public void undoMove() {
-        board.initBoard();
+        System.out.println("undo");
+        board.undoMoveWithCheck(0);
         repaint();
     }
 
@@ -167,7 +172,7 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
                         mCornersX[3], mCornersY[3], losingColor[1], true);
             }
             g2d.setPaint(paint);
-            if (!board.getAllowedMoves().contains(i)) {
+            if (!board.getAllowedMoveSet().contains(i)) {
                 g2d.setPaint(new GradientPaint(paint.getPoint1(), paint.getColor1().darker(), paint.getPoint2(), paint.getColor2().darker()));
             }
             g2d.fillPolygon(mCornersX, mCornersY, NUM_HEX_CORNERS);
@@ -177,6 +182,7 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
 
             g2d.setFont(new Font("Arial", Font.BOLD, (int) (11 * 0.9)));
             g2d.drawString(Integer.toString(i), mCornersX[5] - 3, mCornersY[5] + 11);
+            g2d.drawString(Integer.toString(board.distances[i]), mCornersX[5] - 3, mCornersY[5] + 20);
             int stoneSize = (int) (0.75 * (CELL_R + 1 * (CELL_R / Math.sqrt(2))));
             int smallCircleSize = (int) (0.5 * stoneSize);
             if (piece == board.WHITE) {
@@ -339,7 +345,7 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
      */
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (board.gameOver || !board.isHumanMove())
+        if (board.isGameOver() || !board.isHumanMove())
             return;
         for (int i = 0; i < board.numberOfCells; i++) {
             if (!board.isOnTheBoard(i))
@@ -353,6 +359,10 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
             Polygon polygon = new Polygon(mCornersX, mCornersY, NUM_HEX_CORNERS);
             if (polygon.contains(e.getX(), e.getY())) {
                 board.doMove(i);
+                repaint();
+                if (!board.isGameOver()) {
+                    board.doTurn();
+                }
             }
         }
         repaint();
