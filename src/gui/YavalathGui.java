@@ -113,6 +113,9 @@ public class YavalathGui extends JFrame implements MouseListener {
                 if (e.getKeyChar() == 'n') {
                     yavalathPanel.newGame();
                 }
+                if (e.getKeyChar() == 'u') {
+                    yavalathPanel.undoMove();
+                }
 //                {
 //                    String player1Name = "Human";
 //                    String player2Name = "Human";

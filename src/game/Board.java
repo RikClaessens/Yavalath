@@ -68,10 +68,15 @@ public class Board {
     public static final int oppositeDirection = 3;
     public static final int numberOfDirections = 6;
 
-    // list of moves that have been made so far
+    // number of moves that have been made so far
     public int numberOfMovesMade = 0;
+    // list of moves that have been made so far
     public int[] movesMade;
+    // list of forced moves for each turn
     public HashSet<Integer>[] forcedMovesList;
+    // list of forced moves by each player
+    public HashSet<Integer> forcedMovesByWhite;
+    public HashSet<Integer> forcedMovesByBlack;
 
     public Board() {
         initBoard();
@@ -79,17 +84,22 @@ public class Board {
 
     // initializes an empty board, assign neighboring fields for easy lookup
     public void initBoard() {
+        // all participating players are alive at the start of the game
+        numberOfPlayersAlive = 0;
         for (int i = 1; i <= numberOfPlayers; i++) {
             playersAlive[i] = true;
             numberOfPlayersAlive++;
         }
+        // clear all the fields
         freeFields.clear();
+        // initialize the board with empty fields for each cell that is part of the board
         for (int i = 0; i < numberOfCells; i++) {
             if (cells[i] == 0) {
                 continue;
             }
             board[i] = new Field(i);
         }
+        // computes the neighbors of each field on the board for easy access
         for (int i = 0; i < numberOfCells; i++) {
             if (cells[i] == 0) {
                 continue;
@@ -116,15 +126,25 @@ public class Board {
             // add the index to the list of allowed moves
             freeFields.add(i);
 
-            // some miscellaneous stuff
+            // reset a number of variables
+            // WHITE begins and BLACK wins!
             turn = WHITE;
+            // nobody won the game if we just started
             gameWon = FREE;
-            winningLine.clear();
-            losingLine.clear();
-            forcedMoves.clear();
+            // player list is an empty list, index 0 is not used, 1, 2 & 3 stand for WHITE, BLACK, RED
             players = new Player[4];
+            // the number of moves made thus far is 0
+            numberOfMovesMade = 0;
+            // clear the list of moves made thus far
             movesMade = new int[numberOfFields];
+            // create a new list of forced moves for each turn
+            // there can never be more forced moves sets than there are empty fields on the board
             forcedMovesList = new HashSet[numberOfFields];
+            // the list of forced moves for the first moves if empty
+            forcedMovesList[numberOfMovesMade] = new HashSet<Integer>(numberOfFields);
+            // clear the sets of forced moves by each player
+            forcedMovesByWhite = new HashSet<Integer>(numberOfFields);
+            forcedMovesByBlack = new HashSet<Integer>(numberOfFields);
         }
 
         for (int i = 0; i < numberOfCells; i++) {
@@ -167,16 +187,6 @@ public class Board {
         return i > 0 && i < cells.length && cells[i] == 1;
     }
 
-    public HashSet<Integer> winningLine = new HashSet<Integer>();
-    public HashSet<Integer> losingLine = new HashSet<Integer>();
-    public boolean isOnWinningLine(int i) {
-        return winningLine.contains(i);
-    }
-
-    public boolean isOnLosingLine(int i) {
-        return losingLine.contains(i);
-    }
-
     public void doMove(int i) {
         // check if the move is allowed
         if (!getAllowedMoveSet().contains(i)) {
@@ -188,11 +198,18 @@ public class Board {
         board[i].piece = turn;
         // save it in the list of moves made so far
         movesMade[numberOfMovesMade] = i;
-        // for quickly undoing move, we save the forced moves in a list as well
-        // NOTE, these contain the forced moves for THIS turn
-        forcedMovesList[numberOfMovesMade] = new HashSet<Integer>(forcedMoves);
         // increase the counter of number of moves made
         numberOfMovesMade++;
+        // for quickly undoing move, we save the forced moves in a list as well
+        // NOTE, these contain the forced moves for THIS turn
+        // thus, if white just moved, the list of forced moves he has, were moves forced by black and vice versa
+
+        // the list of forced moves after placing a piece at position i is initialized
+        forcedMovesList[numberOfMovesMade] = new HashSet<Integer>();
+        // position i is removed from the list of forced moves by each player
+        forcedMovesByWhite.remove(i);
+        forcedMovesByBlack.remove(i);
+
         // remove the field on which the piece was put on from the free field list
         freeFields.remove(i);
         // compute the allowed moves for the next turn
@@ -212,22 +229,39 @@ public class Board {
 //        rewindTurn();
 //    }
 
+    // undo's a move
     public void undoMoveWithCheck(int i) {
+        // if there are no moves been made so far we can not go back further
         if (numberOfMovesMade == 0)
             return;
+        // check if the right move is being undone
         if (movesMade[numberOfMovesMade - 1] != i) {
             System.err.println("Trying to undo the wrong move " + movesMade[numberOfMovesMade - 1] + " != " + i);
         }
+        // lower the number of moves made
         numberOfMovesMade--;
+        // the position last played
         int position = movesMade[numberOfMovesMade];
+        int piece = board[position].piece;
 
-        if (!playersAlive[board[position].piece]) {
-            playersAlive[board[position].piece] = true;
+        // if the player died after the last move, bring him back to life!
+        if (!playersAlive[piece]) {
+            playersAlive[piece] = true;
             numberOfPlayersAlive++;
         }
+        // set the position to free
         board[position].piece = FREE;
+        // add the field to the list of free fields
         freeFields.add(position);
-        forcedMoves = forcedMovesList[numberOfMovesMade];
+
+        // reset the list of forced moves
+        // if we're undoing a WHITE move, the list of forced moves was forced by black
+        if (piece == WHITE) {
+            forcedMovesByBlack = forcedMovesList[numberOfMovesMade];
+        } else {
+            forcedMovesByWhite = forcedMovesList[numberOfMovesMade];
+        }
+
         rewindTurn();
     }
 
@@ -243,8 +277,6 @@ public class Board {
             turn = numberOfPlayers;
         }
         gameWon = FREE;
-        losingLine.clear();
-        winningLine.clear();
     }
 
     public void advanceTurn() {
@@ -259,27 +291,57 @@ public class Board {
     }
 
     private HashSet<Integer> freeFields = new HashSet<Integer>();
-    private HashSet<Integer> forcedMoves = new HashSet<Integer>();
 
+    // Computes the allowed moves on the board after a piece has been placed at position i
     public void computeAllowedMoves(int i) {
         // save the played piece
         int piece = board[i].piece;
-        // if the list of forcedmoves has one or more entries, clear the doMove just played, but let the rest remain,
-        if (forcedMoves.size() > 0) {
-            if (forcedMoves.contains(i)) {
-                forcedMoves.remove(i);
-            } else {
-                System.err.println("Illegal doMove played?");
-            }
-        }
+        // remove the just played move from the forcedmoves lists
+        forcedMovesList[numberOfMovesMade].remove(i);
+
         // check for lines of three, four and three with 1 in between in 3 directions > NW - SE, NE - SW, E - W
         for (RowOfFour rowOfFour : board[i].rowsOfFour) {
             computeAllowedMovesInRow(piece, rowOfFour.fields);
         }
+        if (piece == WHITE) {
+            if (forcedMovesByWhite.size() > 0) {
+                System.out.println("There were still " + forcedMovesByWhite.size() + " moves forced by white remaining");
+            }
+            forcedMovesList[numberOfMovesMade].addAll(forcedMovesByWhite);
+            forcedMovesByWhite.addAll(forcedMovesList[numberOfMovesMade]);
+        } else {
+            if (forcedMovesByBlack.size() > 0) {
+                System.out.println("There were still " + forcedMovesByBlack.size() + " moves forced by black remaining");
+            }
+            forcedMovesList[numberOfMovesMade].addAll(forcedMovesByBlack);
+            forcedMovesByBlack.addAll(forcedMovesList[numberOfMovesMade]);
+        }
     }
 
+    // computes the allowed moves in a row of four
+    // there are possibilities
+    // 1] there is a line of 3, but not of 4 > player is dead
+    // 2] there is a line of 4 > player wins
+    // 3] player made a configuration of xx.x or x.xx > player forces a move
     public void computeAllowedMovesInRow(int piece, Field[] fields) {
         // check for line of 3 and 4
+        // first check for lines of 3
+
+        // check if .xx. is the case, if not there is not line of 3 or 4
+        if (fields[1].piece == piece
+                && fields[2].piece == piece
+                ) {
+            // if we have .xx., check if xxxx is the case
+            if (fields[0].piece == piece && fields[3].piece == piece) {
+                // line of 4 found
+                gameWon(piece);
+            } else if (fields[0].piece == piece || fields[3].piece == piece) {
+                // no line of 4 found, but either xxx. is the case or .xxx
+                // line of 3 found
+                killPlayer(piece);
+            }
+        }
+
         if (fields[0].piece == piece
                 && fields[1].piece == piece
                 && fields[2].piece == piece
@@ -288,25 +350,19 @@ public class Board {
             if (fields[3].piece == piece) {
                 // line of 4 found
                 gameWon(piece);
-                for (Field field : fields) {
-                    winningLine.add(field.position);
-                }
             } else {
                 // line of 3 found, but no line of 4
                 killPlayer(piece);
-                for (int i = 0; i < 3; i++) {
-                    losingLine.add(fields[i].position);
-                }
             }
             return;
         }
         // here we know there are no lines of three or four, but we still need to check for forced moves
         if (fields[0].piece == piece && fields[3].piece == piece) {
-            // 2 cases: x x o x or x o x x, where x is a piece of the same color and o is a free field
+            // 2 cases: xx.x or x.xx, where x is a piece of the same color and . is a free field
             if (fields[1].piece == piece && fields[2].piece == FREE) {
-                forcedMoves.add(fields[2].position);
+                forcedMovesList[numberOfMovesMade].add(fields[2].position);
             } else if (fields[2].piece == piece && fields[1].piece == FREE) {
-                forcedMoves.add(fields[1].position);
+                forcedMovesList[numberOfMovesMade].add(fields[1].position);
             }
         }
     }
@@ -350,17 +406,17 @@ public class Board {
         if (isGameOver()) {
             return new HashSet<Integer>();
         }
-        return forcedMoves.size() == 0 ? freeFields : forcedMoves;
+        return forcedMovesList[numberOfMovesMade] == null || forcedMovesList[numberOfMovesMade].size()  == 0 ? freeFields : forcedMovesList[numberOfMovesMade];
     }
 
     public int[] getAllowedMoves() {
         if (isGameOver()) {
             return new int[]{};
         }
-        if (forcedMoves.size() == 0) {
+        if (forcedMovesList[numberOfMovesMade].size() == 0) {
             return toIntArray(freeFields);
         } else {
-            return toIntArray(forcedMoves);
+            return toIntArray(forcedMovesList[numberOfMovesMade]);
         }
     }
 

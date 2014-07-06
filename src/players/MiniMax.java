@@ -24,13 +24,13 @@ public class MiniMax implements Player {
         for (int move : moves) {
             System.out.print(move + " ");
         }
-        System.out.println("\n================================");
+//        System.out.println("\n================================");
         for (int move : moves) {
-            System.out.print("next");
+//            System.out.print("next");
             board.doMove(move);
-            System.out.print("\tmove " + move);
+//            System.out.print("\tmove " + move);
             int score = negamax(board, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
-            System.out.println(" got score  " + score);
+//            System.out.println(" got score  " + score);
             board.undoMoveWithCheck(move);
             if (score > bestScore) {
                 bestMove = move;

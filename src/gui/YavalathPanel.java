@@ -69,6 +69,7 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
     };
 
     public YavalathPanel() {
+
         addMouseMotionListener(this);
         addMouseListener(this);
         repaint();
@@ -162,15 +163,6 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
                     mCellMetrics.computeCorners(mCornersY, mCornersX);
                 }
             }
-            if (board.isOnWinningLine(i)) {
-                paint = new GradientPaint(
-                        mCornersX[0], mCornersY[0], winningColor[0],
-                        mCornersX[3], mCornersY[3], winningColor[1], true);
-            } else if (board.isOnLosingLine(i)) {
-                paint = new GradientPaint(
-                        mCornersX[0], mCornersY[0], losingColor[0],
-                        mCornersX[3], mCornersY[3], losingColor[1], true);
-            }
             g2d.setPaint(paint);
             if (!board.getAllowedMoveSet().contains(i)) {
                 g2d.setPaint(new GradientPaint(paint.getPoint1(), paint.getColor1().darker(), paint.getPoint2(), paint.getColor2().darker()));
@@ -182,7 +174,7 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
 
             g2d.setFont(new Font("Arial", Font.BOLD, (int) (11 * 0.9)));
             g2d.drawString(Integer.toString(i), mCornersX[5] - 3, mCornersY[5] + 11);
-            g2d.drawString(Integer.toString(board.distances[i]), mCornersX[5] - 3, mCornersY[5] + 20);
+//            g2d.drawString(Integer.toString(board.distances[i]), mCornersX[5] - 3, mCornersY[5] + 20);
             int stoneSize = (int) (0.75 * (CELL_R + 1 * (CELL_R / Math.sqrt(2))));
             int smallCircleSize = (int) (0.5 * stoneSize);
             if (piece == board.WHITE) {
@@ -360,9 +352,13 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
             if (polygon.contains(e.getX(), e.getY())) {
                 board.doMove(i);
                 repaint();
+//                System.out.println(">>>> Move " + i + " game over = " + board.isGameOver() + " player " + board.gameWon + " won.");
                 if (!board.isGameOver()) {
                     board.doTurn();
+                } else {
+                    System.out.println("GAME OVER");
                 }
+                break;
             }
         }
         repaint();
