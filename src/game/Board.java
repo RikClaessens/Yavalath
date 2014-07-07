@@ -304,15 +304,9 @@ public class Board {
             computeAllowedMovesInRow(piece, rowOfFour.fields);
         }
         if (piece == WHITE) {
-            if (forcedMovesByWhite.size() > 0) {
-                System.out.println("There were still " + forcedMovesByWhite.size() + " moves forced by white remaining");
-            }
             forcedMovesList[numberOfMovesMade].addAll(forcedMovesByWhite);
             forcedMovesByWhite.addAll(forcedMovesList[numberOfMovesMade]);
         } else {
-            if (forcedMovesByBlack.size() > 0) {
-                System.out.println("There were still " + forcedMovesByBlack.size() + " moves forced by black remaining");
-            }
             forcedMovesList[numberOfMovesMade].addAll(forcedMovesByBlack);
             forcedMovesByBlack.addAll(forcedMovesList[numberOfMovesMade]);
         }
@@ -460,12 +454,20 @@ public class Board {
         StringBuffer stringBuffer = new StringBuffer();
         for (int i = 0; i < numberOfCells; i++) {
             if (cells[i] == 0) {
-                stringBuffer.append(".");
+                stringBuffer.append(" ");
             } else {
-                stringBuffer.append(board[i].piece);
+                switch (board[i].piece) {
+                    case FREE: stringBuffer.append("."); break;
+                    case WHITE: stringBuffer.append("W"); break;
+                    case BLACK: stringBuffer.append("B"); break;
+                }
             }
+            stringBuffer.append(" ");
             if ((i + 1) % rowMajorOrder == 0) {
                 stringBuffer.append("\n");
+                if (row(i + 1) % 2 == 1) {
+                    stringBuffer.append(" ");
+                }
             }
         }
         return stringBuffer.toString();
