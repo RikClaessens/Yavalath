@@ -9,6 +9,7 @@ public class MiniMax implements Player {
 
     private int piece;
     private static int WINSCORE = Integer.MAX_VALUE;
+    private int maxDepth = 2;
 
     public MiniMax(int piece) {
         this.piece = piece;
@@ -21,15 +22,15 @@ public class MiniMax implements Player {
 
         int bestMove = -1;
         int bestScore = Integer.MIN_VALUE;
-        for (int move : moves) {
-            System.out.print(move + " ");
-        }
+//        for (int move : moves) {
+//            System.out.print(move + " ");
+//        }
 //        System.out.println("\n================================");
         for (int move : moves) {
 //            System.out.print("next");
             board.doMove(move);
 //            System.out.print("\tmove " + move);
-            int score = negamax(board, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            int score = negamax(board, maxDepth, Integer.MIN_VALUE, Integer.MAX_VALUE);
 //            System.out.println(" got score  " + score);
             board.undoMoveWithCheck(move);
             if (score > bestScore) {
@@ -37,7 +38,7 @@ public class MiniMax implements Player {
                 bestScore = score;
             }
         }
-        System.out.println("playing move " + bestMove);
+//        System.out.println("playing move " + bestMove);
         return bestMove;
     }
 
@@ -79,6 +80,9 @@ public class MiniMax implements Player {
                     continue;
                 } else if (board.board[i].piece == piece) {
                     score += board.distances[i];
+                }
+                if (board.board[76].piece == piece) {
+                    score += 1000000;
                 }
             }
         }

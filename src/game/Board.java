@@ -3,6 +3,7 @@ package game;
 import players.Player;
 
 import java.util.HashSet;
+import java.util.Iterator;
 
 /**
  * Created by rhmclaessens on 23-06-2014.
@@ -194,6 +195,7 @@ public class Board {
             return;
         }
 
+        System.out.print(">" + i + " ");
         // if it is allowed, set the piece on the board
         board[i].piece = turn;
         // save it in the list of moves made so far
@@ -214,8 +216,40 @@ public class Board {
         freeFields.remove(i);
         // compute the allowed moves for the next turn
         computeAllowedMoves(i);
+//        printGameThusFar();
         // advance the turn to the next player
         advanceTurn();
+    }
+
+    public void printGameThusFar() {
+        System.out.println("\n\tfm :\t" + printForcedMovesArray(forcedMovesList)
+                + "\n\tfmw:\t" + printForcedMoves(forcedMovesByWhite)
+                + "\n\tfmb:\t" + printForcedMoves(forcedMovesByBlack));
+    }
+
+    public String printForcedMovesArray(HashSet<Integer>[] sets) {
+        StringBuilder s = new StringBuilder();
+        int i = 0;
+        for (HashSet<Integer> set : sets) {
+            if (set == null) {
+                break;
+            }
+            s.append(i + "|");
+            s.append(" -" + movesMade[i] + "- |");
+            s.append(printForcedMoves(set));
+            s.append("\n\t\t\t");
+            i++;
+        }
+        return s.toString();
+    }
+
+    public String printForcedMoves(HashSet<Integer> set) {
+        StringBuilder s = new StringBuilder();
+        Iterator<Integer> iterator = set.iterator();
+        while (iterator.hasNext()) {
+            s.append("[" + iterator.next() + "]");
+        }
+        return s.toString();
     }
 
 //    public void undoMove() {
@@ -234,6 +268,7 @@ public class Board {
         // if there are no moves been made so far we can not go back further
         if (numberOfMovesMade == 0)
             return;
+        System.out.print("<" + i + " ");
         // check if the right move is being undone
         if (movesMade[numberOfMovesMade - 1] != i) {
             System.err.println("Trying to undo the wrong move " + movesMade[numberOfMovesMade - 1] + " != " + i);
@@ -256,12 +291,18 @@ public class Board {
 
         // reset the list of forced moves
         // if we're undoing a WHITE move, the list of forced moves was forced by black
+        forcedMovesByBlack.clear();
+        forcedMovesByWhite.clear();
         if (piece == WHITE) {
-            forcedMovesByBlack = forcedMovesList[numberOfMovesMade];
+            forcedMovesByBlack.addAll(forcedMovesList[numberOfMovesMade]);
         } else {
-            forcedMovesByWhite = forcedMovesList[numberOfMovesMade];
+            forcedMovesByWhite.addAll(forcedMovesList[numberOfMovesMade]);
+        }
+        if (numberOfMovesMade + 1 < forcedMovesList.length) {
+            forcedMovesList[numberOfMovesMade + 1].clear();
         }
 
+//        printGameThusFar();
         rewindTurn();
     }
 
@@ -434,13 +475,14 @@ public class Board {
         if (numberOfMovesMade == 0) {
             return copy;
         }
-        for (int i = 0; i < numberOfMovesMade - 1; i++) {
+        for (int i = 0; i < numberOfMovesMade - 2; i++) {
             System.out.print("[" + movesMade[i] + "] ");
             copy.board[movesMade[i]].piece = board[movesMade[i]].piece;
             copy.freeFields.remove(movesMade[i]);
             copy.numberOfMovesMade++;
             copy.advanceTurn();
         }
+        copy.doMove(movesMade[numberOfMovesMade - 2]);
         copy.doMove(movesMade[numberOfMovesMade - 1]);
         System.out.println("[" + movesMade[numberOfMovesMade - 1] + "] ");
         return copy;
