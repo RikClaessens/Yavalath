@@ -191,11 +191,11 @@ public class Board {
     public void doMove(int i) {
         // check if the move is allowed
         if (!getAllowedMoveSet().contains(i)) {
-            System.err.println("Move " + i + " not allowed on board\n" + this.toString());
+//            System.err.println("Move " + i + " not allowed on board\n" + this.toString());
             return;
         }
 
-        System.out.print(">" + i + " ");
+//        System.out.print(">" + i + " ");
         // if it is allowed, set the piece on the board
         board[i].piece = turn;
         // save it in the list of moves made so far
@@ -268,7 +268,7 @@ public class Board {
         // if there are no moves been made so far we can not go back further
         if (numberOfMovesMade == 0)
             return;
-        System.out.print("<" + i + " ");
+//        System.out.print("<" + i + " ");
         // check if the right move is being undone
         if (movesMade[numberOfMovesMade - 1] != i) {
             System.err.println("Trying to undo the wrong move " + movesMade[numberOfMovesMade - 1] + " != " + i);
@@ -476,7 +476,7 @@ public class Board {
             return copy;
         }
         for (int i = 0; i < numberOfMovesMade - 2; i++) {
-            System.out.print("[" + movesMade[i] + "] ");
+//            System.out.print("[" + movesMade[i] + "] ");
             copy.board[movesMade[i]].piece = board[movesMade[i]].piece;
             copy.freeFields.remove(movesMade[i]);
             copy.numberOfMovesMade++;
@@ -484,7 +484,7 @@ public class Board {
         }
         copy.doMove(movesMade[numberOfMovesMade - 2]);
         copy.doMove(movesMade[numberOfMovesMade - 1]);
-        System.out.println("[" + movesMade[numberOfMovesMade - 1] + "] ");
+//        System.out.println("[" + movesMade[numberOfMovesMade - 1] + "] ");
         return copy;
     }
 
