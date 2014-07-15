@@ -12,4 +12,12 @@ public class RowOfFour {
             field.addRowOfFour(this);
         }
     }
+
+    public String toString() {
+        String s = "";
+        for (Field field : fields) {
+            s += field.toString();
+        }
+        return s;
+    }
 }

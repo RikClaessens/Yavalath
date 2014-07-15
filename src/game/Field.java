@@ -19,6 +19,12 @@ public class Field {
     public void addRowOfFour(RowOfFour rowOfFour) {
         this.rowsOfFour.add(rowOfFour);
     }
+
+    public String toString() {
+        String p = piece == 0 ? "." : (piece == 1 ? "W" : "B");
+        return "{" + position + "}[" + p + "]";
+    }
+
 }
 
 

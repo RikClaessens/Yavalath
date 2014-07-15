@@ -78,7 +78,7 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
     public void newGame() {
         board = new Board();
         board.initBoard();
-        board.setPlayer(board.WHITE, new MiniMax(board.WHITE));
+        board.setPlayer(board.WHITE, new MiniMax(board.WHITE, board.BLACK));
 //        board.setPlayer(board.BLACK, new MiniMax(board.BLACK));
         while (!board.isHumanMove()) {
             board.doTurn();

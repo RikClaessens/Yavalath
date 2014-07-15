@@ -278,6 +278,8 @@ public class Board {
         // the position last played
         int position = movesMade[numberOfMovesMade];
         int piece = board[position].piece;
+        // clear the move made from the list
+        movesMade[numberOfMovesMade] = 0;
 
         // if the player died after the last move, bring him back to life!
         if (!playersAlive[piece]) {
@@ -475,15 +477,9 @@ public class Board {
         if (numberOfMovesMade == 0) {
             return copy;
         }
-        for (int i = 0; i < numberOfMovesMade - 2; i++) {
-//            System.out.print("[" + movesMade[i] + "] ");
-            copy.board[movesMade[i]].piece = board[movesMade[i]].piece;
-            copy.freeFields.remove(movesMade[i]);
-            copy.numberOfMovesMade++;
-            copy.advanceTurn();
+        for (int i = 0; i < numberOfMovesMade; i++) {
+            copy.doMove(movesMade[i]);
         }
-        copy.doMove(movesMade[numberOfMovesMade - 2]);
-        copy.doMove(movesMade[numberOfMovesMade - 1]);
 //        System.out.println("[" + movesMade[numberOfMovesMade - 1] + "] ");
         return copy;
     }
