@@ -78,17 +78,16 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
     public void newGame() {
         board = new Board();
         board.initBoard();
-        board.setPlayer(board.WHITE, new MiniMax(board.WHITE, board.BLACK));
-//        board.setPlayer(board.BLACK, new MiniMax(board.BLACK));
-        while (!board.isHumanMove()) {
+        board.setPlayer(board.WHITE, new MiniMax(board.WHITE, board.BLACK, 5));
+        board.setPlayer(board.BLACK, new MiniMax(board.BLACK, board.WHITE, 4));
+        while (!board.isHumanMove() && !board.isGameOver()) {
             board.doTurn();
-            repaint();
-            validate();
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            this.paintImmediately(0, 0, this.getWidth(), this.getHeight());
+            System.out.println("moved");
+            System.out.println(board.toString());
+        }
+        if (board.isGameOver()) {
+            checkWhoWon();
         }
 //        board.doMove(76);
 //        board.doMove(66);
@@ -107,7 +106,9 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
         repaint();
     }
 
-    public void paint(Graphics g) {
+    @Override
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
@@ -343,7 +344,7 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
     public void mouseMoved(MouseEvent e) {
         mouseX  = e.getX();
         mouseY = e.getY();
-        repaint();
+        this.repaint();
     }
 
 
@@ -369,17 +370,13 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
             Polygon polygon = new Polygon(mCornersX, mCornersY, NUM_HEX_CORNERS);
             if (polygon.contains(e.getX(), e.getY())) {
                 board.doMove(i);
-                repaint();
+                this.validate();
+                this.repaint(0, 0, this.getWidth(), this.getHeight());
 //                System.out.println(">>>> Move " + i + " game over = " + board.isGameOver() + " player " + board.gameWon + " won.");
                 if (!board.isGameOver()) {
                     board.doTurn();
                 } else {
-                    System.out.print("GAME OVER");
-                    if (board.gameWon == board.BLACK) {
-                        System.out.println("\tBLACK won");
-                    } else if (board.gameWon == board.WHITE) {
-                        System.out.println("\tWHITE won");
-                    }
+                    checkWhoWon();
                 }
                 break;
             }
@@ -425,5 +422,14 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
     @Override
     public void mouseExited(MouseEvent e) {
 
+    }
+
+    public void checkWhoWon() {
+        System.out.print("GAME OVER");
+        if (board.gameWon == board.BLACK) {
+            System.out.println("\tBLACK won");
+        } else if (board.gameWon == board.WHITE) {
+            System.out.println("\tWHITE won");
+        }
     }
 }

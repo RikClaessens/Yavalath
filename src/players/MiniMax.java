@@ -21,9 +21,10 @@ public class MiniMax implements Player {
     private static int canForceMoveScore = 200;
     private static int canBeForcedToMoveScore = 450;
 
-    public MiniMax(int piece, int opponentPiece) {
+    public MiniMax(int piece, int opponentPiece, int maxDepth) {
         this.piece = piece;
         this.opponentPiece = opponentPiece;
+        this.maxDepth = maxDepth;
     }
 
     /*
@@ -48,7 +49,7 @@ rootNegamaxValue := negamax( rootNode, depth, -∞, +∞, 1)
     public int doMove(Board board) {
         numberOfMovesMadeBeforeSearch = board.numberOfMovesMade;
         int score = negamax(board, maxDepth, Integer.MIN_VALUE, Integer.MAX_VALUE, 1);
-        System.out.println("Score = " + score + " best move = " + bestMove);
+//        System.out.println("Score = " + score + " best move = " + bestMove);
         return bestMove;
     }
 
@@ -102,7 +103,7 @@ rootNegamaxValue := negamax( rootNode, depth, -∞, +∞, 1)
                 score = WINSCORE - board.numberOfMovesMade;
                 type = "win";
             } else {
-                score = -WINSCORE - board.numberOfMovesMade;
+                score = -WINSCORE + board.numberOfMovesMade;
                 type = "loss";
             }
 //            System.out.println("Found a " + type + " after " + (board.numberOfMovesMade - numberOfMovesMadeBeforeSearch) + " moves. Score: " + score + " Moves: " + printMoves(board));

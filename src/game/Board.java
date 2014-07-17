@@ -140,7 +140,7 @@ public class Board {
             movesMade = new int[numberOfFields];
             // create a new list of forced moves for each turn
             // there can never be more forced moves sets than there are empty fields on the board
-            forcedMovesList = new HashSet[numberOfFields];
+            forcedMovesList = new HashSet[numberOfFields + 1];
             // the list of forced moves for the first moves if empty
             forcedMovesList[numberOfMovesMade] = new HashSet<Integer>(numberOfFields);
             // clear the sets of forced moves by each player
