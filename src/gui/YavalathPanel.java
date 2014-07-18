@@ -88,16 +88,6 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
         if (board.isGameOver()) {
             checkWhoWon();
         }
-//        board.doMove(76);
-//        board.doMove(66);
-//        board.doMove(40);
-//        board.doMove(58);
-//        board.doMove(68);
-//        board.doMove(61);
-//        board.doMove(51);
-//        board.doMove(41);
-//        board.doMove(49);
-//        board.doMove(59);
     }
 
     public void undoMove() {
@@ -424,14 +414,18 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
     }
 
     public void checkWhoWon() {
-        System.out.print("GAME OVER");
-        YavalathGui.log("GAME OVER");
-        if (board.gameWon == board.BLACK) {
-            System.out.println("\tBLACK won");
-            YavalathGui.log("\tBLACK won");
-        } else if (board.gameWon == board.WHITE) {
-            System.out.println("\tWHITE won");
-            YavalathGui.log("\tWHITE won");
+        String winMessage = "GAME OVER";
+        switch (board.gameWon) {
+            case Board.BLACK:
+                winMessage += "\tBLACK won";
+                break;
+            case Board.WHITE:
+                winMessage += "\tWHITE won";
+                break;
+            default:
+                break;
         }
+        System.out.println(winMessage);
+        YavalathGui.log(winMessage);
     }
 }
