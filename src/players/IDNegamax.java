@@ -49,7 +49,7 @@ public class IDNegamax implements Player {
             bestPVScore = Integer.MIN_VALUE;
             int score = negamax(board, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, depth);
             idBestMove = bestMove;
-//            System.out.println("Search depth [" + depth + "], best move: " + bestMove);
+            System.out.println("Search depth [" + depth + "], best move: " + bestMove);
 //            System.out.println("Visited " + nodesVisited + " nodes");
         }
 //        System.out.println("Score = " + score + " best move = " + bestMove);
@@ -62,7 +62,7 @@ public class IDNegamax implements Player {
         if (board.isGameOver() || depth == 0) {
             int value = color * evaluate(board);
             if (value > bestPVScore && depth == 0) {
-                System.out.println("Saving a new PV");
+//                System.out.println("Saving a new PV");
                 System.arraycopy(board.movesMade, numberOfMovesMadeBeforeSearch, principalVariation[currentMaxDepth - 1], 0, board.numberOfMovesMade - numberOfMovesMadeBeforeSearch);
                 bestPVScore = value;
             }
@@ -77,7 +77,7 @@ public class IDNegamax implements Player {
             if (value > score) {
                 score = value;
                 if (depth == currentMaxDepth) {
-                    System.out.println("\tNew best move " + child);
+//                    System.out.println("\tNew best move " + child);
                     bestMove = child;
                 }
             }

@@ -82,7 +82,7 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
         while (!board.isHumanMove() && !board.isGameOver()) {
             board.doTurn();
             this.paintImmediately(0, 0, this.getWidth(), this.getHeight());
-            YavalathGui.log((board.numberOfMovesMade % 2 == 0 ? "W" : "B") + ":\t" + board.movesMade[board.numberOfMovesMade - 1]);
+            YavalathGui.log((board.numberOfMovesMade % 2 == 1 ? "W" : "B") + ":\t" + board.movesMade[board.numberOfMovesMade - 1]);
 //            System.out.println(board.toString());
         }
         if (board.isGameOver()) {
@@ -359,11 +359,12 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
             Polygon polygon = new Polygon(mCornersX, mCornersY, NUM_HEX_CORNERS);
             if (polygon.contains(e.getX(), e.getY())) {
                 board.doMove(i);
-                YavalathGui.log((board.numberOfMovesMade % 2 == 0 ? "W" : "B") + ":\t" + board.movesMade[board.numberOfMovesMade - 1]);
+                YavalathGui.log((board.numberOfMovesMade % 2 == 1 ? "W" : "B") + ":\t" + board.movesMade[board.numberOfMovesMade - 1]);
                 this.paintImmediately(0, 0, this.getWidth(), this.getHeight());
-//                System.out.println(">>>> Move " + i + " game over = " + board.isGameOver() + " player " + board.gameWon + " won.");
+                System.out.println(">>>> Move " + i + " game over = " + board.isGameOver() + " player " + board.gameWon + " won.");
                 if (!board.isGameOver()) {
                     board.doTurn();
+                    YavalathGui.log((board.numberOfMovesMade % 2 == 1 ? "W" : "B") + ":\t" + board.movesMade[board.numberOfMovesMade - 1]);
                 } else {
                     checkWhoWon();
                 }
