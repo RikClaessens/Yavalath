@@ -1,6 +1,7 @@
 package game;
 
 import players.Player;
+import util.Util;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -264,14 +265,15 @@ public class Board {
 //    }
 
     // undo's a move
-    public void undoMoveWithCheck(int i) {
+    public boolean undoMoveWithCheck(int i) {
         // if there are no moves been made so far we can not go back further
         if (numberOfMovesMade == 0)
-            return;
+            return true;
 //        System.out.print("<" + i + " ");
         // check if the right move is being undone
         if (movesMade[numberOfMovesMade - 1] != i) {
             System.err.println("Trying to undo the wrong move " + movesMade[numberOfMovesMade - 1] + " != " + i);
+            return false;
         }
         // lower the number of moves made
         numberOfMovesMade--;
@@ -306,6 +308,20 @@ public class Board {
 
 //        printGameThusFar();
         rewindTurn();
+        return true;
+    }
+
+    public boolean checkUndoMove(int i) {
+        // if there are no moves been made so far we can not go back further
+        if (numberOfMovesMade == 0)
+            return true;
+//        System.out.print("<" + i + " ");
+        // check if the right move is being undone
+        if (movesMade[numberOfMovesMade - 1] != i) {
+            System.err.println("Trying to undo the wrong move " + movesMade[numberOfMovesMade - 1] + " != " + i);
+            return false;
+        }
+        return true;
     }
 
     public void doTurn() {
@@ -451,17 +467,10 @@ public class Board {
             return new int[]{};
         }
         if (forcedMovesList[numberOfMovesMade].size() == 0) {
-            return toIntArray(freeFields);
+            return Util.toIntArray(freeFields);
         } else {
-            return toIntArray(forcedMovesList[numberOfMovesMade]);
+            return Util.toIntArray(forcedMovesList[numberOfMovesMade]);
         }
-    }
-
-    public int[] toIntArray(HashSet<Integer> set) {
-        int[] a = new int[set.size()];
-        int i = 0;
-        for (Integer val : set) a[i++] = val;
-        return a;
     }
 
     public void setPlayer(int piece, Player player) {

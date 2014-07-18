@@ -2,17 +2,22 @@ package players;
 
 import game.Board;
 import game.RowOfFour;
+import util.Util;
+
+import java.util.HashSet;
 
 /**
  * Created by rhmclaessens on 01-07-2014.
  */
-public class MiniMax implements Player {
+public class IDNegamax implements Player {
 
     private int piece;
     private int opponentPiece;
     private int maxDepth = 4;
     private int numberOfMovesMadeBeforeSearch;
     private int bestMove = -1;
+
+    private int nodesVisited;
 
     // Scores
     private static int WINSCORE = Integer.MAX_VALUE - 1000;
@@ -21,31 +26,51 @@ public class MiniMax implements Player {
     private static int canForceMoveScore = 200;
     private static int canBeForcedToMoveScore = 450;
 
-    public MiniMax(int piece, int maxDepth) {
+    // Iterative Depth related variables
+    private int[] bestMovesPerDepth;
+    private boolean orderMoves;
+
+    public IDNegamax(int piece, int maxDepth, boolean orderMoves) {
         this.piece = piece;
         this.opponentPiece = piece == Board.WHITE ? Board.BLACK : Board.WHITE;
         this.maxDepth = maxDepth;
+        this.orderMoves = orderMoves;
     }
 
     @Override
     public int doMove(Board board) {
+        nodesVisited = 0;
         numberOfMovesMadeBeforeSearch = board.numberOfMovesMade;
-        int score = negamax(board, maxDepth, Integer.MIN_VALUE, Integer.MAX_VALUE, 1);
+        bestMovesPerDepth = new int[maxDepth];
+        int idBestMove = -1;
+        for (int searchDepth = 1; searchDepth <= maxDepth; searchDepth++) {
+            int score = negamax(board, maxDepth, Integer.MIN_VALUE, Integer.MAX_VALUE, 1);
+            bestMovesPerDepth[searchDepth - 1] = bestMove;
+            idBestMove = bestMove;
+            System.out.println("Search depth [" + searchDepth + "], best move: " + idBestMove);
+        }
 //        System.out.println("Score = " + score + " best move = " + bestMove);
-        return bestMove;
+        System.out.println("Visited " + nodesVisited + " nodes");
+
+        return idBestMove;
     }
 
     public int negamax(Board board, int depth, double alpha, double beta, int color) {
+        nodesVisited++;
         if (board.isGameOver() || depth == 0) {
             return color * evaluate(board);
         }
         int score = Integer.MIN_VALUE;
-        int[] moves = board.getAllowedMoves();
+        int[] moves = orderMoves ? tryIDMoveFirst(maxDepth - depth, board) : board.getAllowedMoves();
         for (int child : moves) {
             board.doMove(child);
             int value = -negamax(board, depth - 1, -beta, -alpha, -color);
-            board.undoMoveWithCheck(child);
+            boolean undoWasOk = board.checkUndoMove(child);
 
+            if (!undoWasOk) {
+                System.out.println("Uh Oh!");
+            }
+            board.undoMoveWithCheck(child);
             if (value > score) {
                 score = value;
                 if (depth == maxDepth) {
@@ -61,6 +86,23 @@ public class MiniMax implements Player {
             }
         }
         return score;
+    }
+
+    public int[] tryIDMoveFirst(int depth, Board board) {
+        HashSet<Integer> allowedMoves = board.getAllowedMoveSet();
+        int bestMoveForDepth = bestMovesPerDepth[depth];
+        if (bestMoveForDepth != 0 && allowedMoves.contains(bestMoveForDepth)) {
+            int[] moves = new int[allowedMoves.size()];
+            moves[0] = bestMoveForDepth;
+            int i = 1;
+            for (Integer val : allowedMoves) {
+                if (val != bestMoveForDepth) {
+                    moves[i++] = val;
+                }
+            }
+            return moves;
+        }
+        return Util.toIntArray(allowedMoves);
     }
 
     public String printMoves(Board board) {

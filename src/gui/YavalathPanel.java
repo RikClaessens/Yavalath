@@ -4,7 +4,7 @@ import com.rush.HexGridCell;
 import game.Board;
 import game.Field;
 import game.RowOfFour;
-import players.MiniMax;
+import players.IDNegamax;
 
 import javax.swing.*;
 import java.awt.*;
@@ -69,7 +69,6 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
     };
 
     public YavalathPanel() {
-
         addMouseMotionListener(this);
         addMouseListener(this);
         repaint();
@@ -78,13 +77,13 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
     public void newGame() {
         board = new Board();
         board.initBoard();
-        board.setPlayer(board.WHITE, new MiniMax(board.WHITE, board.BLACK, 5));
-        board.setPlayer(board.BLACK, new MiniMax(board.BLACK, board.WHITE, 4));
+//        board.setPlayer(board.WHITE, new MiniMax(board.WHITE, 3));
+        board.setPlayer(board.BLACK, new IDNegamax(board.BLACK, 4, true));
         while (!board.isHumanMove() && !board.isGameOver()) {
             board.doTurn();
             this.paintImmediately(0, 0, this.getWidth(), this.getHeight());
-            System.out.println("moved");
-            System.out.println(board.toString());
+            YavalathGui.log((board.numberOfMovesMade % 2 == 0 ? "W" : "B") + ":\t" + board.movesMade[board.numberOfMovesMade - 1]);
+//            System.out.println(board.toString());
         }
         if (board.isGameOver()) {
             checkWhoWon();
@@ -370,8 +369,8 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
             Polygon polygon = new Polygon(mCornersX, mCornersY, NUM_HEX_CORNERS);
             if (polygon.contains(e.getX(), e.getY())) {
                 board.doMove(i);
-                this.validate();
-                this.repaint(0, 0, this.getWidth(), this.getHeight());
+                YavalathGui.log((board.numberOfMovesMade % 2 == 0 ? "W" : "B") + ":\t" + board.movesMade[board.numberOfMovesMade - 1]);
+                this.paintImmediately(0, 0, this.getWidth(), this.getHeight());
 //                System.out.println(">>>> Move " + i + " game over = " + board.isGameOver() + " player " + board.gameWon + " won.");
                 if (!board.isGameOver()) {
                     board.doTurn();
@@ -426,10 +425,13 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
 
     public void checkWhoWon() {
         System.out.print("GAME OVER");
+        YavalathGui.log("GAME OVER");
         if (board.gameWon == board.BLACK) {
             System.out.println("\tBLACK won");
+            YavalathGui.log("\tBLACK won");
         } else if (board.gameWon == board.WHITE) {
             System.out.println("\tWHITE won");
+            YavalathGui.log("\tWHITE won");
         }
     }
 }

@@ -5,9 +5,10 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
 
-public class YavalathGui extends JFrame implements MouseListener {
+public class  YavalathGui extends JFrame implements MouseListener {
 
     private static YavalathGui frame;
+    private static TextPanel textPanel = new TextPanel();
     public YavalathGui() {
         contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -16,9 +17,7 @@ public class YavalathGui extends JFrame implements MouseListener {
         yavalathPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         yavalathPanel.setLayout(new BorderLayout(0, 0));
 
-        JPanel textPanel = new TextPanel();
         textPanel.setAlignmentX(Component.RIGHT_ALIGNMENT);
-
 
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
         contentPane.add(yavalathPanel);
@@ -161,6 +160,11 @@ public class YavalathGui extends JFrame implements MouseListener {
             public void keyPressed(KeyEvent e) {
             }
         });
+    }
+
+    public static void log(String log) {
+        textPanel.log(log);
+        textPanel.paintImmediately(0, 0, textPanel.getWidth(), textPanel.getHeight());
     }
 
     private static final long serialVersionUID = -1921481286866231418L;
