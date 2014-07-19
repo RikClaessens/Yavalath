@@ -1,7 +1,8 @@
-package players;
+package players.ai;
 
 import game.Board;
 import game.RowOfFour;
+import players.Player;
 
 /**
  * Created by rhmclaessens on 01-07-2014.
@@ -90,11 +91,11 @@ public class MiniMax implements Player {
             }
 //            System.out.println("Found a " + type + " after " + (board.numberOfMovesMade - numberOfMovesMadeBeforeSearch) + " moves. Score: " + score + " Moves: " + printMoves(board));
         } else {
-            for (int i = 0; i < board.numberOfCells; i++) {
-                if (board.cells[i] == 0) {
+            for (int i = 0; i < board.NUMBER_OF_CELLS; i++) {
+                if (board.CELLS[i] == 0) {
                     continue;
                 } else if (board.board[i].piece == piece) {
-                    score += board.distances[i];
+                    score += board.DISTANCES[i];
                 }
                 for (RowOfFour rowOfFour : board.board[i].rowsOfFour) {
                     if (rowOfFour.fields[0].position != i) {

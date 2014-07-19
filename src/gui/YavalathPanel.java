@@ -4,7 +4,9 @@ import com.rush.HexGridCell;
 import game.Board;
 import game.Field;
 import game.RowOfFour;
-import players.IDNegamax;
+import players.PlayerSettings;
+import players.ai.IDNegamax;
+import util.Util;
 
 import javax.swing.*;
 import java.awt.*;
@@ -78,7 +80,15 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
         board = new Board();
         board.initBoard();
 //        board.setPlayer(board.WHITE, new MiniMax(board.WHITE, 3));
-        board.setPlayer(board.BLACK, new IDNegamax(board.BLACK, 4, true));
+
+
+        PlayerSettings playerSettingsBlack = new PlayerSettings();
+        playerSettingsBlack.piece = Board.BLACK;
+        playerSettingsBlack.maxDepth = 4;
+        playerSettingsBlack.transpositionTable = true;
+        playerSettingsBlack.orderMoves = true;
+
+        board.setPlayer(Board.BLACK, new IDNegamax(playerSettingsBlack));
         while (!board.isHumanMove() && !board.isGameOver()) {
             board.doTurn();
             this.paintImmediately(0, 0, this.getWidth(), this.getHeight());
@@ -104,7 +114,7 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
         g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
                 RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        Color[] turnColor = board.turn == board.WHITE ? whitePiece : (board.turn == board.BLACK ? blackPiece : redPiece);
+        Color[] turnColor = board.turn == Board.WHITE ? whitePiece : (board.turn == Board.BLACK ? blackPiece : redPiece);
         GradientPaint paint = new GradientPaint(
                 0,
                 0,
@@ -116,7 +126,7 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
         g2d.setPaint(paint);
         g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
 
-        for (int i = 0; i < board.numberOfCells; i++) {
+        for (int i = 0; i < Board.NUMBER_OF_CELLS; i++) {
             if (!board.isOnTheBoard(i))
                 continue;
             int col = board.col(i);
@@ -129,7 +139,7 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
                     mCornersX[0], mCornersY[0], fieldColor[0],
                     mCornersX[3], mCornersY[3], fieldColor[1], true);
             Polygon polygon = new Polygon(mCornersX, mCornersY, NUM_HEX_CORNERS);
-            if (polygon.contains(mouseX, mouseY) && piece == board.FREE) {
+            if (polygon.contains(mouseX, mouseY) && piece == Board.FREE) {
                 paint = new GradientPaint(
                         mCornersX[0], mCornersY[0], fieldColor[1],
                         mCornersX[3], mCornersY[3], fieldColor[2], true);
@@ -182,10 +192,10 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
 
             g2d.setFont(new Font("Arial", Font.BOLD, (int) (11 * 0.9)));
             g2d.drawString(Integer.toString(i), mCornersX[5] - 3, mCornersY[5] + 11);
-//            g2d.drawString(Integer.toString(board.distances[i]), mCornersX[5] - 3, mCornersY[5] + 20);
+//            g2d.drawString(Integer.toString(board.DISTANCES[i]), mCornersX[5] - 3, mCornersY[5] + 20);
             int stoneSize = (int) (0.75 * (CELL_R + 1 * (CELL_R / Math.sqrt(2))));
             int smallCircleSize = (int) (0.5 * stoneSize);
-            if (piece == board.WHITE) {
+            if (piece == Board.WHITE) {
                 paint = new GradientPaint(
                         (int) ((mCornersX[0] + mCornersX[3]) / 2 - 0.5 * stoneSize),
                         (int) ((mCornersY[2] + mCornersY[5]) / 2 - 0.5 * stoneSize),
@@ -263,7 +273,7 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
                         (int) ((mCornersY[2] + mCornersY[5]) / 2 - 0.5 * smallCircleSize),
                         smallCircleSize, smallCircleSize);
             }
-            if (piece == board.RED) {
+            if (piece == Board.RED) {
                 paint = new GradientPaint(
                         (int) ((mCornersX[0] + mCornersX[3]) / 2 - 0.5 * stoneSize),
                         (int) ((mCornersY[2] + mCornersY[5]) / 2 - 0.5 * stoneSize),
@@ -347,7 +357,7 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
     public void mouseClicked(MouseEvent e) {
         if (board.isGameOver() || !board.isHumanMove())
             return;
-        for (int i = 0; i < board.numberOfCells; i++) {
+        for (int i = 0; i < board.NUMBER_OF_CELLS; i++) {
             if (!board.isOnTheBoard(i))
                 continue;
             int col = board.col(i);
@@ -361,7 +371,7 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
                 board.doMove(i);
                 YavalathGui.log((board.numberOfMovesMade % 2 == 1 ? "W" : "B") + ":\t" + board.movesMade[board.numberOfMovesMade - 1]);
                 this.paintImmediately(0, 0, this.getWidth(), this.getHeight());
-                System.out.println(">>>> Move " + i + " game over = " + board.isGameOver() + " player " + board.gameWon + " won.");
+                System.out.println(">>>> Move " + i + " game over = " + (board.isGameOver() ?  " player " + board.gameWon + " won." : ""));
                 if (!board.isGameOver()) {
                     board.doTurn();
                     YavalathGui.log((board.numberOfMovesMade % 2 == 1 ? "W" : "B") + ":\t" + board.movesMade[board.numberOfMovesMade - 1]);
@@ -415,17 +425,7 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
     }
 
     public void checkWhoWon() {
-        String winMessage = "GAME OVER";
-        switch (board.gameWon) {
-            case Board.BLACK:
-                winMessage += "\tBLACK won";
-                break;
-            case Board.WHITE:
-                winMessage += "\tWHITE won";
-                break;
-            default:
-                break;
-        }
+        String winMessage = "GAME OVER" + (board.isGameOver() ? "\t" + Util.piecePlayer(board.gameWon) + " won" : "");
         System.out.println(winMessage);
         YavalathGui.log(winMessage);
     }

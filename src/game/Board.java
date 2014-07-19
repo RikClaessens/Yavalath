@@ -1,5 +1,6 @@
 package game;
 
+import org.apache.commons.math3.random.MersenneTwister;
 import players.Player;
 import util.Util;
 
@@ -12,7 +13,7 @@ import java.util.Iterator;
 public class Board {
 
     // byte array containing a 1 for fields that are part of the game board
-    public static final byte[] cells = {
+    public static final byte[] CELLS = {
             0,0,1,1,1,1,1,0,0,
             0,1,1,1,1,1,1,0,0,
             0,1,1,1,1,1,1,1,0,
@@ -24,7 +25,7 @@ public class Board {
             0,0,1,1,1,1,1,0,0,
     };
     // distances to the edge of the board
-    public static final byte[] distances = {
+    public static final byte[] DISTANCES = {
             0,0,0,0,0,0,0,0,0,
             0,0,1,1,1,1,0,0,0,
             0,0,1,2,2,2,1,0,0,
@@ -36,14 +37,14 @@ public class Board {
             0,0,0,0,0,0,0,0,0,
     };
 
-    // number of entries in the byte array cells
-    public static final int numberOfCells = 81;
+    // number of entries in the byte array CELLS
+    public static final int NUMBER_OF_CELLS = 81;
     // number of actual fields on the game board
-    public static final int numberOfFields = 61;
+    public static final int NUMBER_OF_FIELDS = 61;
     // row major order used for checking in what row a field is
-    public static final int rowMajorOrder = 9;
+    public static final int ROW_MAJOR_ORDER = 9;
     // the actual board, containing the pieces
-    public Field[] board = new Field[numberOfCells];
+    public Field[] board = new Field[NUMBER_OF_CELLS];
     // colors of the players, p1 = white, p2 = black, p3 = red, 0 means a free cell
     public static final int FREE = 0, WHITE = 1, BLACK = 2, RED = 3;
     // turn of the game
@@ -59,7 +60,7 @@ public class Board {
     Player[] players;
 
     // array for easily construction of neighboring fields, first index is the difference
-    // in the cells array, second index is the difference in rows
+    // in the CELLS array, second index is the difference in rows
     private final int[][]
             neighborsInOddRow   = {{ -9, -1}, {-8, -1}, {1, 0}, {10, 1}, {9, 1}, {-1, 0}},
             neighborsInEvenRow  = {{-10, -1}, {-9, -1}, {1, 0}, { 9, 1}, {8, 1}, {-1, 0}};
@@ -80,6 +81,11 @@ public class Board {
     public HashSet<Integer> forcedMovesByWhite;
     public HashSet<Integer> forcedMovesByBlack;
 
+    // zobrist hashKey of the board
+    public long hashKey;
+    // random number table to compute the hash key
+    private long[][] zobristNumbers;
+
     public Board() {
         initBoard();
     }
@@ -95,15 +101,15 @@ public class Board {
         // clear all the fields
         freeFields.clear();
         // initialize the board with empty fields for each cell that is part of the board
-        for (int i = 0; i < numberOfCells; i++) {
-            if (cells[i] == 0) {
+        for (int i = 0; i < NUMBER_OF_CELLS; i++) {
+            if (CELLS[i] == 0) {
                 continue;
             }
             board[i] = new Field(i);
         }
         // computes the neighbors of each field on the board for easy access
-        for (int i = 0; i < numberOfCells; i++) {
-            if (cells[i] == 0) {
+        for (int i = 0; i < NUMBER_OF_CELLS; i++) {
+            if (CELLS[i] == 0) {
                 continue;
             }
             // lookup array for the neighboring fields
@@ -138,19 +144,19 @@ public class Board {
             // the number of moves made thus far is 0
             numberOfMovesMade = 0;
             // clear the list of moves made thus far
-            movesMade = new int[numberOfFields];
+            movesMade = new int[NUMBER_OF_FIELDS];
             // create a new list of forced moves for each turn
             // there can never be more forced moves sets than there are empty fields on the board
-            forcedMovesList = new HashSet[numberOfFields + 1];
+            forcedMovesList = new HashSet[NUMBER_OF_FIELDS + 1];
             // the list of forced moves for the first moves if empty
-            forcedMovesList[numberOfMovesMade] = new HashSet<Integer>(numberOfFields);
+            forcedMovesList[numberOfMovesMade] = new HashSet<Integer>(NUMBER_OF_FIELDS);
             // clear the sets of forced moves by each player
-            forcedMovesByWhite = new HashSet<Integer>(numberOfFields);
-            forcedMovesByBlack = new HashSet<Integer>(numberOfFields);
+            forcedMovesByWhite = new HashSet<Integer>(NUMBER_OF_FIELDS);
+            forcedMovesByBlack = new HashSet<Integer>(NUMBER_OF_FIELDS);
         }
 
-        for (int i = 0; i < numberOfCells; i++) {
-            if (cells[i] == 0) {
+        for (int i = 0; i < NUMBER_OF_CELLS; i++) {
+            if (CELLS[i] == 0) {
                 continue;
             }
             // initialize rows of four, as these neighboring are used very often for doMove checking, win checks etc.
@@ -175,18 +181,27 @@ public class Board {
                 new RowOfFour(fieldsInRow);
             }
         }
+
+        // initialize the random numbers for the transposition table
+        // Use a fixed seed to ensure the same hash for copies of the board
+        MersenneTwister mersenneTwister = new MersenneTwister(0);
+        zobristNumbers = new long[NUMBER_OF_CELLS][2];
+        for (int i = 0; i < NUMBER_OF_CELLS; i++) {
+            zobristNumbers[i][WHITE - 1] = mersenneTwister.nextLong();
+            zobristNumbers[i][BLACK - 1] = mersenneTwister.nextLong();
+        }
     }
 
     public int row(int i) {
-        return i / rowMajorOrder;
+        return i / ROW_MAJOR_ORDER;
     }
 
     public int col(int i) {
-        return i % rowMajorOrder;
+        return i % ROW_MAJOR_ORDER;
     }
 
     public boolean isOnTheBoard(int i) {
-        return i > 0 && i < cells.length && cells[i] == 1;
+        return i > 0 && i < CELLS.length && CELLS[i] == 1;
     }
 
     public void doMove(int i) {
@@ -217,7 +232,9 @@ public class Board {
         freeFields.remove(i);
         // compute the allowed moves for the next turn
         computeAllowedMoves(i);
-//        printGameThusFar();
+
+        // hash the zobristkey of this board after the last played move
+        hashKey ^= zobristNumbers[i][turn - 1];
         // advance the turn to the next player
         advanceTurn();
     }
@@ -253,24 +270,13 @@ public class Board {
         return s.toString();
     }
 
-//    public void undoMove() {
-//        if (numberOfMovesMade == 0)
-//            return;
-//        numberOfMovesMade--;
-//        int position = movesMade[numberOfMovesMade];
-//        board[position].piece = FREE;
-//        freeFields.add(position);
-//        forcedMoves = forcedMovesList[numberOfMovesMade];
-//        rewindTurn();
-//    }
-
     // undo's a move
     public boolean undoMoveWithCheck(int i) {
         // if there are no moves been made so far we can not go back further
         if (numberOfMovesMade == 0)
             return true;
-//        System.out.print("<" + i + " ");
         // check if the right move is being undone
+        // **** not necessary, but very useful for detecting bugs and illegal operations by an ai player
         if (movesMade[numberOfMovesMade - 1] != i) {
             System.err.println("Trying to undo the wrong move " + movesMade[numberOfMovesMade - 1] + " != " + i);
             return false;
@@ -306,7 +312,10 @@ public class Board {
             forcedMovesList[numberOfMovesMade + 1].clear();
         }
 
-//        printGameThusFar();
+        // un-hash the zobristkey of this board after the last played move
+        // this results in the same hash as before this move
+        hashKey ^= zobristNumbers[i][turn - 1];
+
         rewindTurn();
         return true;
     }
@@ -499,18 +508,14 @@ public class Board {
 
     public String toString() {
         StringBuffer stringBuffer = new StringBuffer();
-        for (int i = 0; i < numberOfCells; i++) {
-            if (cells[i] == 0) {
+        for (int i = 0; i < NUMBER_OF_CELLS; i++) {
+            if (CELLS[i] == 0) {
                 stringBuffer.append(" ");
             } else {
-                switch (board[i].piece) {
-                    case FREE: stringBuffer.append("."); break;
-                    case WHITE: stringBuffer.append("W"); break;
-                    case BLACK: stringBuffer.append("B"); break;
-                }
+                stringBuffer.append(Util.piecePlayerLabel(board[i].piece));
             }
             stringBuffer.append(" ");
-            if ((i + 1) % rowMajorOrder == 0) {
+            if ((i + 1) % ROW_MAJOR_ORDER == 0) {
                 stringBuffer.append("\n");
                 if (row(i + 1) % 2 == 1) {
                     stringBuffer.append(" ");
