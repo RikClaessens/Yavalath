@@ -12,7 +12,7 @@ import java.util.Iterator;
  */
 public class Board {
 
-    // byte array containing a 1 for fields that are part of the game board
+    // byte array containing a 1 for fields that are part of the game fields
     public static final byte[] CELLS = {
             0,0,1,1,1,1,1,0,0,
             0,1,1,1,1,1,1,0,0,
@@ -24,7 +24,7 @@ public class Board {
             0,1,1,1,1,1,1,0,0,
             0,0,1,1,1,1,1,0,0,
     };
-    // distances to the edge of the board
+    // distances to the edge of the fields
     public static final byte[] DISTANCES = {
             0,0,0,0,0,0,0,0,0,
             0,0,1,1,1,1,0,0,0,
@@ -39,12 +39,12 @@ public class Board {
 
     // number of entries in the byte array CELLS
     public static final int NUMBER_OF_CELLS = 81;
-    // number of actual fields on the game board
+    // number of actual fields on the game fields
     public static final int NUMBER_OF_FIELDS = 61;
     // row major order used for checking in what row a field is
     public static final int ROW_MAJOR_ORDER = 9;
-    // the actual board, containing the pieces
-    public Field[] board = new Field[NUMBER_OF_CELLS];
+    // the actual fields, containing the pieces
+    public Field[] fields = new Field[NUMBER_OF_CELLS];
     // colors of the players, p1 = white, p2 = black, p3 = red, 0 means a free cell
     public static final int FREE = 0, WHITE = 1, BLACK = 2, RED = 3;
     // turn of the game
@@ -81,7 +81,7 @@ public class Board {
     public HashSet<Integer> forcedMovesByWhite;
     public HashSet<Integer> forcedMovesByBlack;
 
-    // zobrist hashKey of the board
+    // zobrist hashKey of the fields
     public long hashKey;
     // random number table to compute the hash key
     private long[][] zobristNumbers;
@@ -90,7 +90,7 @@ public class Board {
         initBoard();
     }
 
-    // initializes an empty board, assign neighboring fields for easy lookup
+    // initializes an empty fields, assign neighboring fields for easy lookup
     public void initBoard() {
         // all participating players are alive at the start of the game
         numberOfPlayersAlive = 0;
@@ -100,14 +100,14 @@ public class Board {
         }
         // clear all the fields
         freeFields.clear();
-        // initialize the board with empty fields for each cell that is part of the board
+        // initialize the fields with empty fields for each cell that is part of the fields
         for (int i = 0; i < NUMBER_OF_CELLS; i++) {
             if (CELLS[i] == 0) {
                 continue;
             }
-            board[i] = new Field(i);
+            fields[i] = new Field(i);
         }
-        // computes the neighbors of each field on the board for easy access
+        // computes the neighbors of each field on the fields for easy access
         for (int i = 0; i < NUMBER_OF_CELLS; i++) {
             if (CELLS[i] == 0) {
                 continue;
@@ -121,14 +121,14 @@ public class Board {
 
                 // check if the indexOffset ends up in the right row
                 // in fact this is checking that no neighbors are assigned that would be on the
-                // next or previous row, but on the opposite side of the board
+                // next or previous row, but on the opposite side of the fields
                 if (row + rowOffset != row(i + indexOffset)) {
                     continue;
                 }
 
-                // if the field is also on the board, then it is a valid neighbor
+                // if the field is also on the fields, then it is a valid neighbor
                 if (isOnTheBoard(i + indexOffset)) {
-                    board[i].neighbors[j] = board[i + indexOffset];
+                    fields[i].neighbors[j] = fields[i + indexOffset];
                 }
             }
             // add the index to the list of allowed moves
@@ -146,7 +146,7 @@ public class Board {
             // clear the list of moves made thus far
             movesMade = new int[NUMBER_OF_FIELDS];
             // create a new list of forced moves for each turn
-            // there can never be more forced moves sets than there are empty fields on the board
+            // there can never be more forced moves sets than there are empty fields on the fields
             forcedMovesList = new HashSet[NUMBER_OF_FIELDS + 1];
             // the list of forced moves for the first moves if empty
             forcedMovesList[numberOfMovesMade] = new HashSet<Integer>(NUMBER_OF_FIELDS);
@@ -166,11 +166,11 @@ public class Board {
                 // search 3 fields in each direction
                 Field[] fieldsInRow = new Field[4];
                 // add the current field to the row of four
-                fieldsInRow[0] = board[i];
-                Field field = board[i];
+                fieldsInRow[0] = fields[i];
+                Field field = fields[i];
                 for (int r = 1; r < 4; r++) {
                     Field neighbor = field.neighbors[directionToSearch];
-                    // if the neighbor is not on the board, then there is no row of four here
+                    // if the neighbor is not on the fields, then there is no row of four here
                     if (neighbor == null) {
                         continue A;
                     } else {
@@ -183,7 +183,7 @@ public class Board {
         }
 
         // initialize the random numbers for the transposition table
-        // Use a fixed seed to ensure the same hash for copies of the board
+        // Use a fixed seed to ensure the same hash for copies of the fields
         MersenneTwister mersenneTwister = new MersenneTwister(0);
         zobristNumbers = new long[NUMBER_OF_CELLS][2];
         for (int i = 0; i < NUMBER_OF_CELLS; i++) {
@@ -207,13 +207,13 @@ public class Board {
     public void doMove(int i) {
         // check if the move is allowed
         if (!getAllowedMoveSet().contains(i)) {
-//            System.err.println("Move " + i + " not allowed on board\n" + this.toString());
+//            System.err.println("Move " + i + " not allowed on fields\n" + this.toString());
             return;
         }
 
 //        System.out.print(">" + i + " ");
-        // if it is allowed, set the piece on the board
-        board[i].piece = turn;
+        // if it is allowed, set the piece on the fields
+        fields[i].piece = turn;
         // save it in the list of moves made so far
         movesMade[numberOfMovesMade] = i;
         // increase the counter of number of moves made
@@ -233,7 +233,12 @@ public class Board {
         // compute the allowed moves for the next turn
         computeAllowedMoves(i);
 
-        // hash the zobristkey of this board after the last played move
+        // hash the zobristkey of this fields after the last played move
+        // first check if the second player used the swap rule
+        if (numberOfMovesMade == 2 && movesMade[0] == movesMade[1]) {
+            // if so, unhash the position of the first move
+            hashKey ^= zobristNumbers[movesMade[0]][WHITE - 1];
+        }
         hashKey ^= zobristNumbers[i][turn - 1];
         // advance the turn to the next player
         advanceTurn();
@@ -275,17 +280,17 @@ public class Board {
         // if there are no moves been made so far we can not go back further
         if (numberOfMovesMade == 0)
             return true;
-        // check if the right move is being undone
-        // **** not necessary, but very useful for detecting bugs and illegal operations by an ai player
-        if (movesMade[numberOfMovesMade - 1] != i) {
-            System.err.println("Trying to undo the wrong move " + movesMade[numberOfMovesMade - 1] + " != " + i);
-            return false;
-        }
         // lower the number of moves made
         numberOfMovesMade--;
         // the position last played
         int position = movesMade[numberOfMovesMade];
-        int piece = board[position].piece;
+        // check if the right move is being undone
+        // **** not necessary, but very useful for detecting bugs and illegal operations by an ai player
+        if (position != i) {
+            System.err.println("Trying to undo the wrong move " + position + " != " + i);
+            return false;
+        }
+        int piece = fields[position].piece;
         // clear the move made from the list
         movesMade[numberOfMovesMade] = 0;
 
@@ -294,10 +299,15 @@ public class Board {
             playersAlive[piece] = true;
             numberOfPlayersAlive++;
         }
-        // set the position to free
-        board[position].piece = FREE;
-        // add the field to the list of free fields
-        freeFields.add(position);
+        // check if a swap move is being undone
+        if (numberOfMovesMade == 1 && movesMade[0] == i) {
+            fields[position].piece = WHITE;
+        } else {
+            // set the position to free
+            fields[position].piece = FREE;
+            // add the field to the list of free fields
+            freeFields.add(position);
+        }
 
         // reset the list of forced moves
         // if we're undoing a WHITE move, the list of forced moves was forced by black
@@ -308,11 +318,12 @@ public class Board {
         } else {
             forcedMovesByWhite.addAll(forcedMovesList[numberOfMovesMade]);
         }
+        // clear the list of forced moves, forced by this move
         if (numberOfMovesMade + 1 < forcedMovesList.length) {
             forcedMovesList[numberOfMovesMade + 1].clear();
         }
 
-        // un-hash the zobristkey of this board after the last played move
+        // un-hash the zobristkey of this fields after the last played move
         // this results in the same hash as before this move
         hashKey ^= zobristNumbers[i][turn - 1];
 
@@ -360,15 +371,15 @@ public class Board {
 
     private HashSet<Integer> freeFields = new HashSet<Integer>();
 
-    // Computes the allowed moves on the board after a piece has been placed at position i
+    // Computes the allowed moves on the fields after a piece has been placed at position i
     public void computeAllowedMoves(int i) {
         // save the played piece
-        int piece = board[i].piece;
+        int piece = fields[i].piece;
         // remove the just played move from the forcedmoves lists
         forcedMovesList[numberOfMovesMade].remove(i);
 
         // check for lines of three, four and three with 1 in between in 3 directions > NW - SE, NE - SW, E - W
-        for (RowOfFour rowOfFour : board[i].rowsOfFour) {
+        for (RowOfFour rowOfFour : fields[i].rowsOfFour) {
             computeAllowedMovesInRow(piece, rowOfFour.fields);
         }
         if (piece == WHITE) {
@@ -468,7 +479,12 @@ public class Board {
         if (isGameOver()) {
             return new HashSet<Integer>();
         }
-        return forcedMovesList[numberOfMovesMade] == null || forcedMovesList[numberOfMovesMade].size()  == 0 ? freeFields : forcedMovesList[numberOfMovesMade];
+        if (numberOfMovesMade == 1) {
+            HashSet<Integer> moves = new HashSet<Integer>(freeFields);
+            moves.add(movesMade[numberOfMovesMade - 1]);
+            return moves;
+        }
+        return forcedMovesList[numberOfMovesMade] == null || forcedMovesList[numberOfMovesMade].size()  == 0 ? new HashSet<Integer>(freeFields) : new HashSet<Integer>(forcedMovesList[numberOfMovesMade]);
     }
 
     public int[] getAllowedMoves() {
@@ -476,6 +492,11 @@ public class Board {
             return new int[]{};
         }
         if (forcedMovesList[numberOfMovesMade].size() == 0) {
+            if (numberOfMovesMade == 1) {
+                HashSet<Integer> moves = new HashSet<Integer>(freeFields);
+                moves.add(movesMade[numberOfMovesMade - 1]);
+                return Util.toIntArray(moves);
+            }
             return Util.toIntArray(freeFields);
         } else {
             return Util.toIntArray(forcedMovesList[numberOfMovesMade]);
@@ -512,7 +533,7 @@ public class Board {
             if (CELLS[i] == 0) {
                 stringBuffer.append(" ");
             } else {
-                stringBuffer.append(Util.piecePlayerLabel(board[i].piece));
+                stringBuffer.append(Util.piecePlayerLabel(fields[i].piece));
             }
             stringBuffer.append(" ");
             if ((i + 1) % ROW_MAJOR_ORDER == 0) {

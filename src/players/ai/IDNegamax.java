@@ -26,37 +26,44 @@ public class IDNegamax implements Player {
     // Evaluation Function Scores & Penalties
     private static int WINSCORE = Integer.MAX_VALUE - 1000;
     private static int FORCED_MOVES_SCORE = 500;
-    private static int FORCED_MOVES_PENALTY = 800;
+    private static int FORCED_MOVES_PENALTY = -800;
     private static int CAN_FORCE_MOVE_SCORE = 200;
-    private static int CAN_BE_FORCED_TO_MOVE_PENALTY = 450;
+    private static int CAN_BE_FORCED_TO_MOVE_PENALTY = -450;
+    private static int TRIANGLE_OF_TWO_SCORE = 600;
+    private static int TRIANGLE_OF_TWO_PENALTY = -900;
+    private static int DISTANCE_SCORE = 200;
 
     // Move Ordering related variables
     private boolean orderMoves;
 
-    // Iterative Depth related variables
-    private int[][] principalVariation;
+    // Principal variation related variables
+    private int[][] principalVariationMoves;
     private int bestPVScore;
+    private boolean principalVariation;
 
     // TranspositionTable related variables
+    private boolean transpositionTable;
     private HashMap<Long, TTEntry> tt;
     private static int TT_SIZE;
 
-    public IDNegamax(PlayerSettings pSettings) {
-        this.piece = pSettings.piece;
-        this.opponentPiece = pSettings.getOpponentPiece(piece);
+    public IDNegamax(PlayerSettings playerSettings) {
+        this.piece = playerSettings.piece;
+        this.opponentPiece = playerSettings.getOpponentPiece(piece);
         this.opponentPiece = piece == Board.WHITE ? Board.BLACK : Board.WHITE;
-        this.globalMaxDepth = pSettings.maxDepth;
-        this.orderMoves = pSettings.orderMoves;
+        this.globalMaxDepth = playerSettings.maxDepth;
+        this.orderMoves = playerSettings.orderMoves;
+        this.transpositionTable = playerSettings.transpositionTable;
+        this.principalVariation = playerSettings.principalVariation;
     }
 
     @Override
     public int doMove(Board board) {
         // reset the counter for the number of nodes visited
         nodesVisited = 0;
-        // save the number of moves played on the board for which we need to select a move
+        // save the number of moves played on the fields for which we need to select a move
         numberOfMovesMadeBeforeSearch = board.numberOfMovesMade;
         // initialize the principal variation
-        principalVariation = new int[globalMaxDepth][globalMaxDepth];
+        principalVariationMoves = new int[globalMaxDepth][globalMaxDepth];
         // initialize the transposition table
         tt = new HashMap<Long, TTEntry>(TT_SIZE);
 
@@ -68,9 +75,14 @@ public class IDNegamax implements Player {
             System.out.println("Search depth [" + depth + "], best move: " + bestMove);
 //            System.out.println("Visited " + nodesVisited + " nodes");
         }
-//        System.out.println("Score = " + score + " best move = " + bestMove);
+        System.out.println("Seleted move: " + idBestMove + ", # nodes: " + nodesVisited);
 
         return idBestMove;
+    }
+
+    @Override
+    public boolean isHuman() {
+        return false;
     }
 
     public int negamax(Board board, int depth, double alpha, double beta, int color, int currentMaxDepth) {
@@ -78,7 +90,7 @@ public class IDNegamax implements Player {
         double alphaOriginal = alpha;
 
         // transposition table lookup
-        if (tt.containsKey(board.hashKey)) {
+        if (transpositionTable && tt.containsKey(board.hashKey)) {
             TTEntry ttEntry = tt.get(board.hashKey);
             if (ttEntry.depth >= depth) {
                 switch (ttEntry.flag) {
@@ -102,7 +114,7 @@ public class IDNegamax implements Player {
             int value = color * evaluate(board);
             // Save principal variation if a higher score is reached
             if (value > bestPVScore && depth == 0) {
-                System.arraycopy(board.movesMade, numberOfMovesMadeBeforeSearch, principalVariation[currentMaxDepth - 1], 0, board.numberOfMovesMade - numberOfMovesMadeBeforeSearch);
+                System.arraycopy(board.movesMade, numberOfMovesMadeBeforeSearch, principalVariationMoves[currentMaxDepth - 1], 0, board.numberOfMovesMade - numberOfMovesMadeBeforeSearch);
                 bestPVScore = value;
             }
             return value;
@@ -151,7 +163,7 @@ public class IDNegamax implements Player {
             return board.getAllowedMoves();
         }
         HashSet<Integer> allowedMoves = board.getAllowedMoveSet();
-        int bestMoveForDepth = principalVariation[currentMaxDepth - 2][currentMaxDepth - depth - 1];
+        int bestMoveForDepth = principalVariationMoves[currentMaxDepth - 2][currentMaxDepth - depth - 1];
         if (bestMoveForDepth != 0 && allowedMoves.contains(bestMoveForDepth)) {
             int[] moves = new int[allowedMoves.size()];
             moves[0] = bestMoveForDepth;
@@ -180,8 +192,10 @@ public class IDNegamax implements Player {
         return moveBuilder.toString();
     }
 
+    // evaluation function
     public int evaluate(Board board) {
         int score = 0;
+        // check for a game win, take into account the numberofmovesmade > postponing a loss or getting to a win sooner is better
         if (board.isGameOver()) {
             if (board.gameWon == piece) {
                 score = WINSCORE - board.numberOfMovesMade;
@@ -190,12 +204,14 @@ public class IDNegamax implements Player {
             }
         } else {
             for (int i = 0; i < Board.NUMBER_OF_CELLS; i++) {
+                // playing near the center gives a small bonus in the early game, because there is more freedom
                 if (Board.CELLS[i] == 0) {
                     continue;
-                } else if (board.board[i].piece == piece) {
-                    score += Board.DISTANCES[i];
+                } else if (board.fields[i].piece == piece) {
+                    score += Board.DISTANCES[i] * DISTANCE_SCORE;
                 }
-                for (RowOfFour rowOfFour : board.board[i].rowsOfFour) {
+                // check for ros of four > strong position
+                for (RowOfFour rowOfFour : board.fields[i].rowsOfFour) {
                     if (rowOfFour.fields[0].position != i) {
                         continue;
                     }
@@ -208,14 +224,45 @@ public class IDNegamax implements Player {
                             && rowOfFour.fields[1].piece == Board.FREE
                             && rowOfFour.fields[2].piece == Board.FREE
                             && rowOfFour.fields[3].piece == opponentPiece) {
-                        score -= CAN_BE_FORCED_TO_MOVE_PENALTY;
+                        score += CAN_BE_FORCED_TO_MOVE_PENALTY;
+                    }
+                }
+                // check for triangles of size 2 > strong position
+                // 2 possible options:
+                // 1] field i and its south-west and south-east neighbors
+                // 2] field i and its east and south-east neighbors
+                // optimize by checking field i first and then the south-east neighbor
+                // no need to check in last row
+                if (board.row(i) < 8 && board.fields[i].piece == piece) {
+                    if (board.fields[i].neighbors[Board.neighborSE] != null && board.fields[i].neighbors[Board.neighborSE].piece == piece) {
+                        // check for option 1]
+                        if (board.fields[i].neighbors[Board.neighborSW] != null && board.fields[i].neighbors[Board.neighborSW].piece == piece) {
+                            score += TRIANGLE_OF_TWO_SCORE;
+                        }
+                        // check for option 2]
+                        if (board.fields[i].neighbors[Board.neighborE] != null && board.fields[i].neighbors[Board.neighborE].piece == piece) {
+                            score += TRIANGLE_OF_TWO_SCORE;
+                        }
+                    }
+                }
+                // decrease the score if opponent gets a triangle of two
+                if (board.row(i) < 8 && board.fields[i].piece == opponentPiece) {
+                    if (board.fields[i].neighbors[Board.neighborSE] != null && board.fields[i].neighbors[Board.neighborSE].piece == opponentPiece) {
+                        // check for option 1]
+                        if (board.fields[i].neighbors[Board.neighborSW] != null && board.fields[i].neighbors[Board.neighborSW].piece == opponentPiece) {
+                            score += TRIANGLE_OF_TWO_PENALTY;
+                        }
+                        // check for option 2]
+                        if (board.fields[i].neighbors[Board.neighborE] != null && board.fields[i].neighbors[Board.neighborE].piece == opponentPiece) {
+                            score += TRIANGLE_OF_TWO_PENALTY;
+                        }
                     }
                 }
             }
             if (piece == Board.WHITE) {
                 score += board.forcedMovesByWhite.size() * FORCED_MOVES_SCORE;
             } else {
-                score -= board.forcedMovesByBlack.size() * FORCED_MOVES_PENALTY;
+                score += board.forcedMovesByBlack.size() * FORCED_MOVES_PENALTY;
             }
         }
         return score;

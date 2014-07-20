@@ -4,8 +4,7 @@ import com.rush.HexGridCell;
 import game.Board;
 import game.Field;
 import game.RowOfFour;
-import players.PlayerSettings;
-import players.ai.IDNegamax;
+import players.Player;
 import util.Util;
 
 import javax.swing.*;
@@ -76,24 +75,21 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
         repaint();
     }
 
-    public void newGame() {
+    public void newGame(Player playerWhite, Player playerBlack) {
         board = new Board();
         board.initBoard();
-//        board.setPlayer(board.WHITE, new MiniMax(board.WHITE, 3));
+//        fields.setPlayer(fields.WHITE, new MiniMax(fields.WHITE, 3));
 
-
-        PlayerSettings playerSettingsBlack = new PlayerSettings();
-        playerSettingsBlack.piece = Board.BLACK;
-        playerSettingsBlack.maxDepth = 4;
-        playerSettingsBlack.transpositionTable = true;
-        playerSettingsBlack.orderMoves = true;
-
-        board.setPlayer(Board.BLACK, new IDNegamax(playerSettingsBlack));
+        if (!playerWhite.isHuman()) {
+            board.setPlayer(Board.WHITE, playerWhite);
+        }
+        if (!playerBlack.isHuman()) {
+            board.setPlayer(Board.BLACK, playerBlack);
+        }
         while (!board.isHumanMove() && !board.isGameOver()) {
             board.doTurn();
             this.paintImmediately(0, 0, this.getWidth(), this.getHeight());
             YavalathGui.log((board.numberOfMovesMade % 2 == 1 ? "W" : "B") + ":\t" + board.movesMade[board.numberOfMovesMade - 1]);
-//            System.out.println(board.toString());
         }
         if (board.isGameOver()) {
             checkWhoWon();
@@ -101,7 +97,9 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
     }
 
     public void undoMove() {
-        board.undoMoveWithCheck(board.movesMade[board.numberOfMovesMade - 1]);
+        if (board.numberOfMovesMade >= 1) {
+            board.undoMoveWithCheck(board.movesMade[board.numberOfMovesMade - 1]);
+        }
         repaint();
     }
 
@@ -131,7 +129,7 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
                 continue;
             int col = board.col(i);
             int row = board.row(i);
-            int piece = board.board[i].piece;
+            int piece = board.fields[i].piece;
 
             mCellMetrics.setCellIndex(row, col);
             mCellMetrics.computeCorners(mCornersY, mCornersX);
@@ -146,7 +144,7 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
             } else {
                 boolean paintNeighbors = false;
                 if (paintNeighbors) {
-                    for (Field neighbor : board.board[i].neighbors) {
+                    for (Field neighbor : board.fields[i].neighbors) {
                         if (neighbor == null)
                             continue;
                         mCellMetrics.setCellIndex(board.row(neighbor.position), board.col(neighbor.position));
@@ -163,7 +161,7 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
                 }
                 boolean paintRowsOfFour = false;
                 if (paintRowsOfFour) {
-                    for (RowOfFour rowOfFour : board.board[i].rowsOfFour) {
+                    for (RowOfFour rowOfFour : board.fields[i].rowsOfFour) {
                         for (Field neighbor : rowOfFour.fields) {
                             if (neighbor == null)
                                 continue;
@@ -192,7 +190,7 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
 
             g2d.setFont(new Font("Arial", Font.BOLD, (int) (11 * 0.9)));
             g2d.drawString(Integer.toString(i), mCornersX[5] - 3, mCornersY[5] + 11);
-//            g2d.drawString(Integer.toString(board.DISTANCES[i]), mCornersX[5] - 3, mCornersY[5] + 20);
+//            g2d.drawString(Integer.toString(fields.DISTANCES[i]), mCornersX[5] - 3, mCornersY[5] + 20);
             int stoneSize = (int) (0.75 * (CELL_R + 1 * (CELL_R / Math.sqrt(2))));
             int smallCircleSize = (int) (0.5 * stoneSize);
             if (piece == Board.WHITE) {
@@ -362,7 +360,7 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
                 continue;
             int col = board.col(i);
             int row = board.row(i);
-            int piece = board.board[i].piece;
+            int piece = board.fields[i].piece;
 
             mCellMetrics.setCellIndex(row, col);
             mCellMetrics.computeCorners(mCornersY, mCornersX);
@@ -373,8 +371,13 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
                 this.paintImmediately(0, 0, this.getWidth(), this.getHeight());
                 System.out.println(">>>> Move " + i + " game over = " + (board.isGameOver() ?  " player " + board.gameWon + " won." : ""));
                 if (!board.isGameOver()) {
-                    board.doTurn();
-                    YavalathGui.log((board.numberOfMovesMade % 2 == 1 ? "W" : "B") + ":\t" + board.movesMade[board.numberOfMovesMade - 1]);
+                    if (!board.isHumanMove()) {
+                        board.doTurn();
+                        YavalathGui.log((board.numberOfMovesMade % 2 == 1 ? "W" : "B") + ":\t" + board.movesMade[board.numberOfMovesMade - 1]);
+                    }
+                    if (board.isGameOver()) {
+                        checkWhoWon();
+                    }
                 } else {
                     checkWhoWon();
                 }

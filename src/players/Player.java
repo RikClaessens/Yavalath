@@ -8,4 +8,5 @@ import game.Board;
 public interface Player {
 
     public int doMove(Board board);
+    public boolean isHuman();
 }
