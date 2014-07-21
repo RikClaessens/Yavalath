@@ -82,6 +82,7 @@ public class  YavalathGui extends JFrame implements MouseListener {
             public void keyPressed(KeyEvent e) {
             }
         });
+        pack();
     }
 
     public static void log(String log) {

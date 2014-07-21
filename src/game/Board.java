@@ -47,6 +47,8 @@ public class Board {
     public Field[] fields = new Field[NUMBER_OF_CELLS];
     // colors of the players, p1 = white, p2 = black, p3 = red, 0 means a free cell
     public static final int FREE = 0, WHITE = 1, BLACK = 2, RED = 3;
+    public static final int ZOBRIST_NULL = 2;
+    public static final int NULL_MOVE_POSITION = -1;
     // turn of the game
     public int turn;
     // number of players in the game, range [2,3]
@@ -71,6 +73,8 @@ public class Board {
     public static final int oppositeDirection = 3;
     public static final int numberOfDirections = 6;
 
+    // list of free fields on the board
+    private HashSet<Integer> freeFields = new HashSet<Integer>();
     // number of moves that have been made so far
     public int numberOfMovesMade = 0;
     // list of moves that have been made so far
@@ -185,10 +189,11 @@ public class Board {
         // initialize the random numbers for the transposition table
         // Use a fixed seed to ensure the same hash for copies of the fields
         MersenneTwister mersenneTwister = new MersenneTwister(0);
-        zobristNumbers = new long[NUMBER_OF_CELLS][2];
+        zobristNumbers = new long[NUMBER_OF_CELLS][3];
         for (int i = 0; i < NUMBER_OF_CELLS; i++) {
             zobristNumbers[i][WHITE - 1] = mersenneTwister.nextLong();
             zobristNumbers[i][BLACK - 1] = mersenneTwister.nextLong();
+            zobristNumbers[i][ZOBRIST_NULL] = mersenneTwister.nextLong();
         }
     }
 
@@ -244,6 +249,69 @@ public class Board {
         advanceTurn();
     }
 
+    // performs a null move
+    public void doNullMove() {
+        // save the null move in the list of moves made so far
+        movesMade[numberOfMovesMade] = NULL_MOVE_POSITION;
+        // increase the counter of number of moves made
+        numberOfMovesMade++;
+
+        // the list of forced moves after the null move
+        forcedMovesList[numberOfMovesMade] = new HashSet<Integer>();
+        // for the next move, the list of forced moves, will be the list of moves forced by the same player who did the null move
+        if (numberOfMovesMade % 2 == 1) {
+            forcedMovesList[numberOfMovesMade].addAll(forcedMovesByWhite);
+        } else {
+            forcedMovesList[numberOfMovesMade].addAll(forcedMovesByBlack);
+        }
+
+        // hash a null move, use the random number at index numberOfMovesMade - 1
+        hashKey ^= zobristNumbers[numberOfMovesMade - 1][ZOBRIST_NULL];
+        // advance the turn to the next player
+        advanceTurn();
+    }
+
+    // undos a null move
+    public boolean undoNullMove() {
+        // if there are no moves been made so far we can not go back further
+        if (numberOfMovesMade == 0)
+            return true;
+        // lower the number of moves made
+        numberOfMovesMade--;
+        // the position last played
+        int position = movesMade[numberOfMovesMade];
+        // check if the right move is being undone > check for position played == NULL_MOVE_POSITION, i.e. null move
+        // **** not necessary, but very useful for detecting bugs and illegal operations by an ai player
+        if (position != NULL_MOVE_POSITION) {
+            numberOfMovesMade++;
+            System.err.println("Trying to undo a null move, but the last move was not a null move");
+            return false;
+        }
+        // clear the move made from the list
+        movesMade[numberOfMovesMade] = 0;
+
+        // reset the list of forced moves
+        // if we're undoing a WHITE move, the list of forced moves was forced by black
+        forcedMovesByBlack.clear();
+        forcedMovesByWhite.clear();
+        if (numberOfMovesMade % 2  == 1) {
+            forcedMovesByBlack.addAll(forcedMovesList[numberOfMovesMade + 1]);
+        } else {
+            forcedMovesByWhite.addAll(forcedMovesList[numberOfMovesMade + 1]);
+        }
+        // clear the list of forced moves, forced by this move
+        if (numberOfMovesMade + 1 < forcedMovesList.length) {
+            forcedMovesList[numberOfMovesMade + 1].clear();
+        }
+
+        // un-hash the zobristkey of this fields after the last played move
+        // this results in the same hash as before this move
+        hashKey ^= zobristNumbers[numberOfMovesMade][ZOBRIST_NULL];
+
+        rewindTurn();
+        return true;
+    }
+
     public void printGameThusFar() {
         System.out.println("\n\tfm :\t" + printForcedMovesArray(forcedMovesList)
                 + "\n\tfmw:\t" + printForcedMoves(forcedMovesByWhite)
@@ -287,6 +355,7 @@ public class Board {
         // check if the right move is being undone
         // **** not necessary, but very useful for detecting bugs and illegal operations by an ai player
         if (position != i) {
+            numberOfMovesMade++;
             System.err.println("Trying to undo the wrong move " + position + " != " + i);
             return false;
         }
@@ -323,11 +392,12 @@ public class Board {
             forcedMovesList[numberOfMovesMade + 1].clear();
         }
 
+        rewindTurn();
+
         // un-hash the zobristkey of this fields after the last played move
         // this results in the same hash as before this move
         hashKey ^= zobristNumbers[i][turn - 1];
 
-        rewindTurn();
         return true;
     }
 
@@ -364,12 +434,9 @@ public class Board {
             turn = turn % numberOfPlayers + 1;
             if (!playersAlive[turn]) {
                 System.err.println("Game is over");
-                return;
             }
         }
     }
-
-    private HashSet<Integer> freeFields = new HashSet<Integer>();
 
     // Computes the allowed moves on the fields after a piece has been placed at position i
     public void computeAllowedMoves(int i) {
@@ -501,6 +568,10 @@ public class Board {
         } else {
             return Util.toIntArray(forcedMovesList[numberOfMovesMade]);
         }
+    }
+
+    public boolean allowedMovesForced() {
+        return forcedMovesList[numberOfMovesMade].size() > 0;
     }
 
     public void setPlayer(int piece, Player player) {

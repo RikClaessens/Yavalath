@@ -9,8 +9,9 @@ import util.Util;
 public class XOrTest {
     public static void main(String[] args) {
         XOrTest xOrTest = new XOrTest();
-        xOrTest.test();
-        xOrTest.test2();
+//        xOrTest.test();
+//        xOrTest.test2();
+        xOrTest.test3();
     }
 
     public void test() {
@@ -32,5 +33,31 @@ public class XOrTest {
         Board copy = board.copy();
         System.out.println(board.hashKey);
         System.out.println(copy.hashKey);
+    }
+
+    public void test3() {
+        Board board = new Board();
+        board.doMove(40); // W
+        board.doMove(2);
+        board.doMove(42); // W
+        board.doMove(3);
+        board.doMove(48); // W
+        board.doMove(74);
+        board.doMove(67); // W
+        board.doMove(78);
+        board.doMove(39); // W
+        board.doMove(41);
+
+        System.out.println(board.hashKey);
+        board.doNullMove();
+        System.out.println(board.hashKey);
+        board.doMove(58);
+        System.out.println(board.hashKey);
+        board.undoMoveWithCheck(58);
+        System.out.println(board.hashKey);
+        board.undoNullMove();
+        System.out.println(board.hashKey);
+        board.doMove(36);
+        System.out.println(board.hashKey);
     }
 }

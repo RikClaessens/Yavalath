@@ -34,26 +34,35 @@ public class IDNegamax implements Player {
     private static int DISTANCE_SCORE = 200;
 
     // Move Ordering related variables
-    private boolean orderMoves;
+    private boolean useMoveOrdering;
 
     // Principal variation related variables
     private int[][] principalVariationMoves;
     private int bestPVScore;
-    private boolean principalVariation;
+    private boolean usePVS;
 
     // TranspositionTable related variables
-    private boolean transpositionTable;
+    private boolean useTT;
     private HashMap<Long, TTEntry> tt;
     private static int TT_SIZE;
+
+    // Null move related variables
+    private boolean useNullMove;
+    private int nullMoveR;
+
+    // Quiescence Search related variables
+    private boolean useQuiescence;
 
     public IDNegamax(PlayerSettings playerSettings) {
         this.piece = playerSettings.piece;
         this.opponentPiece = playerSettings.getOpponentPiece(piece);
         this.opponentPiece = piece == Board.WHITE ? Board.BLACK : Board.WHITE;
         this.globalMaxDepth = playerSettings.maxDepth;
-        this.orderMoves = playerSettings.orderMoves;
-        this.transpositionTable = playerSettings.transpositionTable;
-        this.principalVariation = playerSettings.principalVariation;
+        this.useMoveOrdering = playerSettings.useMoveOrdering;
+        this.useTT = playerSettings.useTT;
+        this.usePVS = playerSettings.usePVS;
+        this.useNullMove = playerSettings.useNullMove;
+        this.useQuiescence = playerSettings.useQuiescence;
     }
 
     @Override
@@ -85,12 +94,12 @@ public class IDNegamax implements Player {
         return false;
     }
 
-    public int negamax(Board board, int depth, double alpha, double beta, int color, int currentMaxDepth) {
+    public int negamax(Board board, int depth, int alpha, int beta, int color, int currentMaxDepth) {
         nodesVisited++;
         double alphaOriginal = alpha;
 
         // transposition table lookup
-        if (transpositionTable && tt.containsKey(board.hashKey)) {
+        if (useTT && tt.containsKey(board.hashKey)) {
             TTEntry ttEntry = tt.get(board.hashKey);
             if (ttEntry.depth >= depth) {
                 switch (ttEntry.flag) {
@@ -109,9 +118,41 @@ public class IDNegamax implements Player {
             }
         }
 
+        // null move
+        /*
+         conduct a null-move search if it is legal and desired
+        if (!in check() && null ok()){
+            make null move();
+         null-move search with minimal window around beta
+            value = -search(-beta, -beta + 1, depth - R - 1);
+            if (value >= beta) cutoff in case of fail-high
+                return value;
+        }
+         */
+
+        // null moves
+        if (useNullMove) {
+            // do not use a null move when player is forced to play some moves, because this leads to instant loss
+            // also do not allow 2 null moves follow each other
+            if (!board.allowedMovesForced() && board.numberOfMovesMade > 2 && board.numberOfMovesMade > Board.NUMBER_OF_FIELDS && board.movesMade[board.numberOfMovesMade - 1] != -1) {
+                board.doNullMove();
+                int value = -negamax(board, depth - nullMoveR - 1, -beta, -beta + 1, -color, currentMaxDepth);
+                board.undoNullMove();
+                if (value >= beta) {
+                    return value;
+                }
+            }
+        }
+
         // check if terminal node, i.e. game is won or maximum depth has been reached
         if (board.isGameOver() || depth == 0) {
-            int value = color * evaluate(board);
+            int value;
+            // Quiescence Search
+            if (useQuiescence) {
+                value = quiescence(board, alpha, beta, color);
+            } else {
+                value = color * evaluate(board);
+            }
             // Save principal variation if a higher score is reached
             if (value > bestPVScore && depth == 0) {
                 System.arraycopy(board.movesMade, numberOfMovesMadeBeforeSearch, principalVariationMoves[currentMaxDepth - 1], 0, board.numberOfMovesMade - numberOfMovesMadeBeforeSearch);
@@ -121,7 +162,7 @@ public class IDNegamax implements Player {
         }
         // standard negamax
         int score = Integer.MIN_VALUE;
-        int[] moves = orderMoves ? orderPVMoves(currentMaxDepth - depth, board, currentMaxDepth) : board.getAllowedMoves();
+        int[] moves = useMoveOrdering ? orderPVMoves(currentMaxDepth - depth, board, currentMaxDepth) : board.getAllowedMoves();
         for (int child : moves) {
             board.doMove(child);
             int value = -negamax(board, depth - 1, -beta, -alpha, -color, currentMaxDepth);
@@ -157,6 +198,54 @@ public class IDNegamax implements Player {
 
         return score;
     }
+
+    /*
+    QS(s,alpha,beta){
+        score = Eval(s);
+        if( score >= beta)
+            return score;
+        if( score > alpha)
+            alpha = score;
+        for( child = 1; child <= NumQSSuccessors( s ); child++ ) {
+            result = -QS( QSSuccessor( child ), -beta, -alpha);
+            if( result > score ){
+                score = result;
+                if( result >= beta )
+                    break;
+                if( result > alpha )
+                    score = alpha;
+            }
+        }
+        return( score );
+    }
+     */
+
+    public int quiescence(Board board, int alpha, int beta, int color) {
+        int score = color * evaluate(board);
+        if (score >= beta) {
+            return score;
+        }
+        if (score > alpha) {
+            return score;
+        }
+        int[] moves = board.getAllowedMoves();
+        for (int child : moves) {
+            board.doMove(child);
+            int result = -quiescence(board, -beta, -alpha, -color);
+            board.undoMoveWithCheck(child);
+            if (result > score) {
+                score = result;
+            }
+            if (result > alpha) {
+                score = alpha;
+            }
+            if (result >= beta) {
+                break;
+            }
+        }
+        return score;
+    }
+
 
     public int[] orderPVMoves(int depth, Board board, int currentMaxDepth) {
         if (currentMaxDepth <= 1 || depth == 0) {

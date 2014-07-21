@@ -271,45 +271,45 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
                         (int) ((mCornersY[2] + mCornersY[5]) / 2 - 0.5 * smallCircleSize),
                         smallCircleSize, smallCircleSize);
             }
-            if (piece == Board.RED) {
-                paint = new GradientPaint(
-                        (int) ((mCornersX[0] + mCornersX[3]) / 2 - 0.5 * stoneSize),
-                        (int) ((mCornersY[2] + mCornersY[5]) / 2 - 0.5 * stoneSize),
-                        redPiece[0],
-                        (int) ((mCornersX[0] + mCornersX[3]) / 2 - 0.5 * stoneSize) + stoneSize,
-                        (int) ((mCornersY[2] + mCornersY[5]) / 2 - 0.5 * stoneSize) + stoneSize,
-                        redPiece[1], true);
-                g2d.setPaint(paint);
-                g2d.fillOval(
-                        (int) ((mCornersX[0] + mCornersX[3]) / 2 - 0.5 * stoneSize),
-                        (int) ((mCornersY[2] + mCornersY[5]) / 2 - 0.5 * stoneSize),
-                        stoneSize, stoneSize);
-
-                g2d.setColor(pieceOutlineColor[0]);
-                g2d.drawOval(
-                        (int) ((mCornersX[0] + mCornersX[3]) / 2 - 0.5 * stoneSize),
-                        (int) ((mCornersY[2] + mCornersY[5]) / 2 - 0.5 * stoneSize),
-                        stoneSize, stoneSize);
-
-                paint = new GradientPaint(
-                        (int) ((mCornersX[0] + mCornersX[3]) / 2 - 0.5 * smallCircleSize),
-                        (int) ((mCornersY[2] + mCornersY[5]) / 2 - 0.5 * smallCircleSize),
-                        redPiece[2],
-                        (int) ((mCornersX[0] + mCornersX[3]) / 2 - 0.5 * smallCircleSize) + smallCircleSize,
-                        (int) ((mCornersY[2] + mCornersY[5]) / 2 - 0.5 * smallCircleSize) + smallCircleSize,
-                        redPiece[3], true);
-                g2d.setPaint(paint);
-                g2d.fillOval(
-                        (int) ((mCornersX[0] + mCornersX[3]) / 2 - 0.5 * smallCircleSize),
-                        (int) ((mCornersY[2] + mCornersY[5]) / 2 - 0.5 * smallCircleSize),
-                        smallCircleSize, smallCircleSize);
-
-                g2d.setColor(pieceOutlineColor[1]);
-                g2d.drawOval(
-                        (int) ((mCornersX[0] + mCornersX[3]) / 2 - 0.5 * smallCircleSize),
-                        (int) ((mCornersY[2] + mCornersY[5]) / 2 - 0.5 * smallCircleSize),
-                        smallCircleSize, smallCircleSize);
-            }
+//            if (piece == Board.RED) {
+//                paint = new GradientPaint(
+//                        (int) ((mCornersX[0] + mCornersX[3]) / 2 - 0.5 * stoneSize),
+//                        (int) ((mCornersY[2] + mCornersY[5]) / 2 - 0.5 * stoneSize),
+//                        redPiece[0],
+//                        (int) ((mCornersX[0] + mCornersX[3]) / 2 - 0.5 * stoneSize) + stoneSize,
+//                        (int) ((mCornersY[2] + mCornersY[5]) / 2 - 0.5 * stoneSize) + stoneSize,
+//                        redPiece[1], true);
+//                g2d.setPaint(paint);
+//                g2d.fillOval(
+//                        (int) ((mCornersX[0] + mCornersX[3]) / 2 - 0.5 * stoneSize),
+//                        (int) ((mCornersY[2] + mCornersY[5]) / 2 - 0.5 * stoneSize),
+//                        stoneSize, stoneSize);
+//
+//                g2d.setColor(pieceOutlineColor[0]);
+//                g2d.drawOval(
+//                        (int) ((mCornersX[0] + mCornersX[3]) / 2 - 0.5 * stoneSize),
+//                        (int) ((mCornersY[2] + mCornersY[5]) / 2 - 0.5 * stoneSize),
+//                        stoneSize, stoneSize);
+//
+//                paint = new GradientPaint(
+//                        (int) ((mCornersX[0] + mCornersX[3]) / 2 - 0.5 * smallCircleSize),
+//                        (int) ((mCornersY[2] + mCornersY[5]) / 2 - 0.5 * smallCircleSize),
+//                        redPiece[2],
+//                        (int) ((mCornersX[0] + mCornersX[3]) / 2 - 0.5 * smallCircleSize) + smallCircleSize,
+//                        (int) ((mCornersY[2] + mCornersY[5]) / 2 - 0.5 * smallCircleSize) + smallCircleSize,
+//                        redPiece[3], true);
+//                g2d.setPaint(paint);
+//                g2d.fillOval(
+//                        (int) ((mCornersX[0] + mCornersX[3]) / 2 - 0.5 * smallCircleSize),
+//                        (int) ((mCornersY[2] + mCornersY[5]) / 2 - 0.5 * smallCircleSize),
+//                        smallCircleSize, smallCircleSize);
+//
+//                g2d.setColor(pieceOutlineColor[1]);
+//                g2d.drawOval(
+//                        (int) ((mCornersX[0] + mCornersX[3]) / 2 - 0.5 * smallCircleSize),
+//                        (int) ((mCornersY[2] + mCornersY[5]) / 2 - 0.5 * smallCircleSize),
+//                        smallCircleSize, smallCircleSize);
+//            }
         }
     }
 

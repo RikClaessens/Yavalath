@@ -17,12 +17,17 @@ import java.awt.*;
 public class PlayerPanel extends JPanel {
 
     private String[] players = new String[]{"Human", "IDNegamax"};
+    private static int[] DEF_PLAYERS = new int[]{0, 1};
     private JComboBox comboPlayerList;
     private JCheckBox checkTT;
     private JCheckBox checkMoveOrdering;
     private JCheckBox checkPVS;
+    private JCheckBox checkNullMove;
+    private JCheckBox checkQuiescence;
     private JSpinner spinnerMaxDepth;
-    private static int defaultMaxDepth = 5;
+    private JSpinner spinnerNullMoveR;
+    private static int DEF_MAX_DEPTH = 5;
+    private static int DEF_NULL_MOVE_R = 2;
     private int piece;
 
     public PlayerPanel(int piece) {
@@ -33,7 +38,13 @@ public class PlayerPanel extends JPanel {
         add(new JLabel("AI"));
         comboPlayerList = new JComboBox(players);
         add(comboPlayerList);
-        comboPlayerList.setSelectedIndex(1);
+        comboPlayerList.setSelectedIndex(DEF_PLAYERS[piece - 1]);
+
+        SpinnerModel maxDepthSpinnerModel = new SpinnerNumberModel(DEF_MAX_DEPTH, 1, 100, 1);
+        spinnerMaxDepth = new JSpinner(maxDepthSpinnerModel);
+        add(new JLabel("Max Depth"));
+        add(spinnerMaxDepth);
+        ((JSpinner.DefaultEditor) spinnerMaxDepth.getEditor()).getTextField().setEditable(false);
 
         add(new JLabel("TT"));
         checkTT = new JCheckBox();
@@ -50,11 +61,21 @@ public class PlayerPanel extends JPanel {
         checkPVS.setSelected(true);
         add(checkPVS);
 
-        SpinnerModel maxDepthSpinnerModel = new SpinnerNumberModel(defaultMaxDepth, 1, 100, 1);
-        spinnerMaxDepth = new JSpinner(maxDepthSpinnerModel);
-        add(new JLabel("Max Depth"));
-        add(spinnerMaxDepth);
-        ((JSpinner.DefaultEditor) spinnerMaxDepth.getEditor()).getTextField().setEditable(false);
+        add(new JLabel("Null move"));
+        checkNullMove = new JCheckBox();
+        checkNullMove.setSelected(true);
+        add(checkNullMove);
+
+        add(new JLabel("Quiescence"));
+        checkQuiescence = new JCheckBox();
+        checkQuiescence.setSelected(true);
+        add(checkQuiescence);
+
+        SpinnerModel nullMoveRSpinnerModel = new SpinnerNumberModel(DEF_NULL_MOVE_R, 0, 5, 1);
+        spinnerNullMoveR = new JSpinner(nullMoveRSpinnerModel);
+        add(new JLabel("Null Move R"));
+        add(spinnerNullMoveR);
+        ((JSpinner.DefaultEditor) spinnerNullMoveR.getEditor()).getTextField().setEditable(false);
     }
 
     public Player getPlayer() {
@@ -64,10 +85,14 @@ public class PlayerPanel extends JPanel {
         } else {
             PlayerSettings playerSettings = new PlayerSettings();
             playerSettings.piece = piece;
-            playerSettings.transpositionTable = checkTT.isSelected();
-            playerSettings.principalVariation = checkPVS.isSelected();
-            playerSettings.orderMoves = checkMoveOrdering.isSelected();
+            playerSettings.useTT = checkTT.isSelected();
+            playerSettings.usePVS = checkPVS.isSelected();
+            playerSettings.useMoveOrdering = checkMoveOrdering.isSelected();
+            playerSettings.useQuiescence = checkQuiescence.isSelected();
             playerSettings.maxDepth = (Integer) spinnerMaxDepth.getValue();
+            playerSettings.useNullMove = checkNullMove.isSelected();
+            playerSettings.nullMoveR = (Integer) spinnerNullMoveR.getValue();
+
             switch (comboPlayerList.getSelectedIndex()) {
                 case 1:
                     player = new IDNegamax(playerSettings); break;
