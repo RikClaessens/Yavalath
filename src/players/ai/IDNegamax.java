@@ -1,6 +1,7 @@
 package players.ai;
 
 import game.Board;
+import game.Field;
 import game.RowOfFour;
 import players.Player;
 import players.PlayerSettings;
@@ -23,12 +24,15 @@ public class IDNegamax implements Player {
 
     private int nodesVisited;
 
+    private static int INF = 2000000000;
+
     // Evaluation Function Scores & Penalties
-    private static int WINSCORE = Integer.MAX_VALUE - 1000;
+    private static int WIN_SCORE = 1000000;
+    private static int LOSS_SCORE = -1000000;
     private static int FORCED_MOVES_SCORE = 500;
-    private static int FORCED_MOVES_PENALTY = -800;
+    private static int FORCED_MOVES_PENALTY = 0;
     private static int CAN_FORCE_MOVE_SCORE = 200;
-    private static int CAN_BE_FORCED_TO_MOVE_PENALTY = -450;
+    private static int CAN_BE_FORCED_TO_MOVE_PENALTY = 0;
     private static int TRIANGLE_OF_TWO_SCORE = 600;
     private static int TRIANGLE_OF_TWO_PENALTY = -900;
     private static int DISTANCE_SCORE = 200;
@@ -79,13 +83,14 @@ public class IDNegamax implements Player {
         int idBestMove = -1;
         for (int depth = 1; depth <= globalMaxDepth; depth++) {
             bestPVScore = Integer.MIN_VALUE;
-            int score = negamax(board, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, depth);
+            int score = negamax(board, depth, -INF, INF, 1, depth);
             idBestMove = bestMove;
-            System.out.println("Search depth [" + depth + "], best move: " + bestMove);
+            System.out.println("Search depth [" + depth + "], best move: " + bestMove + " score: " + score + " # of nodes visited " + nodesVisited);
 //            System.out.println("Visited " + nodesVisited + " nodes");
         }
         System.out.println("Seleted move: " + idBestMove + ", # nodes: " + nodesVisited);
 
+        tt.clear();
         return idBestMove;
     }
 
@@ -117,18 +122,6 @@ public class IDNegamax implements Player {
                 }
             }
         }
-
-        // null move
-        /*
-         conduct a null-move search if it is legal and desired
-        if (!in check() && null ok()){
-            make null move();
-         null-move search with minimal window around beta
-            value = -search(-beta, -beta + 1, depth - R - 1);
-            if (value >= beta) cutoff in case of fail-high
-                return value;
-        }
-         */
 
         // null moves
         if (useNullMove) {
@@ -165,17 +158,31 @@ public class IDNegamax implements Player {
         int[] moves = useMoveOrdering ? orderPVMoves(currentMaxDepth - depth, board, currentMaxDepth) : board.getAllowedMoves();
         for (int child : moves) {
             board.doMove(child);
+            if (currentMaxDepth < 4)
+                System.out.println(Util.getTabs(board.numberOfMovesMade - numberOfMovesMadeBeforeSearch) + "> " + child);
             int value = -negamax(board, depth - 1, -beta, -alpha, -color, currentMaxDepth);
+            if (currentMaxDepth < 4)
+                System.out.println(Util.getTabs(board.numberOfMovesMade - numberOfMovesMadeBeforeSearch) + "< " + child + " = " + value);
             board.undoMoveWithCheck(child);
+//            try {
+//                Thread.sleep(1);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
             if (value > score) {
                 score = value;
                 // keep track of best move found so far
                 if (depth == currentMaxDepth) {
-//                    System.out.println("\tNew best move " + child);
+//                    System.out.println("\tNew best move " + child + " score " + score);
                     bestMove = child;
+                    if (currentMaxDepth == 5 && child == 2) {
+                        board.doMove(child);
+                        int test = -negamax(board, depth - 1, -beta, -alpha, -color, currentMaxDepth);
+                        board.undoMoveWithCheck(child);
+                    }
                 }
             }
-            if (value > alpha) {
+            if (score > alpha) {
                 alpha = score;
             }
             if (score >= beta) {
@@ -184,41 +191,21 @@ public class IDNegamax implements Player {
         }
 
         // transposition table store
-        TTEntry ttEntry = new TTEntry();
-        ttEntry.value = score;
-        if (score <= alphaOriginal) {
-            ttEntry.flag = TTEntry.UPPER_BOUND;
-        } else if (score >= beta) {
-            ttEntry.flag = TTEntry.LOWER_BOUND;
-        } else {
-            ttEntry.flag = TTEntry.EXACT;
+        if (useTT) {
+            TTEntry ttEntry = new TTEntry();
+            ttEntry.value = score;
+            if (score <= alphaOriginal) {
+                ttEntry.flag = TTEntry.UPPER_BOUND;
+            } else if (score >= beta) {
+                ttEntry.flag = TTEntry.LOWER_BOUND;
+            } else {
+                ttEntry.flag = TTEntry.EXACT;
+            }
+            ttEntry.depth = depth - 1;
+            tt.put(board.hashKey, ttEntry);
         }
-        ttEntry.depth = depth;
-        tt.put(board.hashKey, ttEntry);
-
         return score;
     }
-
-    /*
-    QS(s,alpha,beta){
-        score = Eval(s);
-        if( score >= beta)
-            return score;
-        if( score > alpha)
-            alpha = score;
-        for( child = 1; child <= NumQSSuccessors( s ); child++ ) {
-            result = -QS( QSSuccessor( child ), -beta, -alpha);
-            if( result > score ){
-                score = result;
-                if( result >= beta )
-                    break;
-                if( result > alpha )
-                    score = alpha;
-            }
-        }
-        return( score );
-    }
-     */
 
     public int quiescence(Board board, int alpha, int beta, int color) {
         int score = color * evaluate(board);
@@ -226,24 +213,55 @@ public class IDNegamax implements Player {
             return score;
         }
         if (score > alpha) {
-            return score;
+            alpha = score;
         }
         int[] moves = board.getAllowedMoves();
         for (int child : moves) {
+            if (!wouldForceAMove(board, child)) {
+                continue;
+            }
             board.doMove(child);
             int result = -quiescence(board, -beta, -alpha, -color);
             board.undoMoveWithCheck(child);
             if (result > score) {
                 score = result;
-            }
-            if (result > alpha) {
-                score = alpha;
-            }
-            if (result >= beta) {
-                break;
+                if (result >= beta) {
+                    break;
+                }
+                if (result > alpha) {
+                    score = alpha;
+                }
             }
         }
         return score;
+    }
+
+    public boolean wouldForceAMove(Board board, int i) {
+        boolean wouldForceAMove = false;
+        board.fields[i].piece = board.turn;
+
+        for (RowOfFour rowOfFour : board.fields[i].rowsOfFour) {
+            if (wouldForceAMoveInRow(board, board.turn, rowOfFour.fields)) {
+                wouldForceAMove = true;
+                break;
+            }
+        }
+        board.fields[i].piece = Board.FREE;
+        return wouldForceAMove;
+    }
+
+    // check quiescent moves, similar to computeAllowedMovesInRow in Board.java
+    public boolean wouldForceAMoveInRow(Board board, int piece, Field[] fields) {
+        // check if move i would lead to a forced move
+        return  fields[0].piece == piece
+                &&
+                fields[3].piece == piece
+                &&
+                (
+                    (fields[1].piece == piece && fields[2].piece == Board.FREE)
+                    ||
+                    (fields[2].piece == piece && fields[1].piece == Board.FREE)
+                );
     }
 
 
@@ -287,9 +305,9 @@ public class IDNegamax implements Player {
         // check for a game win, take into account the numberofmovesmade > postponing a loss or getting to a win sooner is better
         if (board.isGameOver()) {
             if (board.gameWon == piece) {
-                score = WINSCORE - board.numberOfMovesMade;
+                score += WIN_SCORE - board.numberOfMovesMade;
             } else {
-                score = -WINSCORE + board.numberOfMovesMade;
+                score += LOSS_SCORE + board.numberOfMovesMade;
             }
         } else {
             for (int i = 0; i < Board.NUMBER_OF_CELLS; i++) {
@@ -299,7 +317,7 @@ public class IDNegamax implements Player {
                 } else if (board.fields[i].piece == piece) {
                     score += Board.DISTANCES[i] * DISTANCE_SCORE;
                 }
-                // check for ros of four > strong position
+                // check for triangle of size four > strong position
                 for (RowOfFour rowOfFour : board.fields[i].rowsOfFour) {
                     if (rowOfFour.fields[0].position != i) {
                         continue;
@@ -353,6 +371,9 @@ public class IDNegamax implements Player {
             } else {
                 score += board.forcedMovesByBlack.size() * FORCED_MOVES_PENALTY;
             }
+        }
+        if (score < -10000) {
+            return score;
         }
         return score;
     }

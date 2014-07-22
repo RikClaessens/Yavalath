@@ -11,7 +11,8 @@ public class XOrTest {
         XOrTest xOrTest = new XOrTest();
 //        xOrTest.test();
 //        xOrTest.test2();
-        xOrTest.test3();
+//        xOrTest.test3();
+        xOrTest.test4();
     }
 
     public void test() {
@@ -59,5 +60,12 @@ public class XOrTest {
         System.out.println(board.hashKey);
         board.doMove(36);
         System.out.println(board.hashKey);
+    }
+
+    public void test4() {
+        System.out.println(Integer.MIN_VALUE);
+        System.out.println(Integer.MAX_VALUE);
+        System.out.println(-Integer.MIN_VALUE);
+        System.out.println(-Integer.MAX_VALUE);
     }
 }

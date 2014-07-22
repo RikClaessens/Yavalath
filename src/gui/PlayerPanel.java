@@ -28,6 +28,11 @@ public class PlayerPanel extends JPanel {
     private JSpinner spinnerNullMoveR;
     private static int DEF_MAX_DEPTH = 5;
     private static int DEF_NULL_MOVE_R = 2;
+    private static boolean DEF_USE_NULL_MOVE = false;
+    private static boolean DEF_USE_QUIESCENE = true;
+    private static boolean DEF_USE_PVS = true;
+    private static boolean DEF_USE_TT = true;
+    private static boolean DEF_USE_MOVE_ORDERING = true;
     private int piece;
 
     public PlayerPanel(int piece) {
@@ -46,29 +51,19 @@ public class PlayerPanel extends JPanel {
         add(spinnerMaxDepth);
         ((JSpinner.DefaultEditor) spinnerMaxDepth.getEditor()).getTextField().setEditable(false);
 
-        add(new JLabel("TT"));
-        checkTT = new JCheckBox();
-        checkTT.setSelected(true);
+        checkTT = createCheckBox("TT", DEF_USE_TT);
         add(checkTT);
 
-        add(new JLabel("Move Ordering"));
-        checkMoveOrdering = new JCheckBox();
-        checkMoveOrdering.setSelected(true);
+        checkMoveOrdering = createCheckBox("Move Ordering", DEF_USE_MOVE_ORDERING);
         add(checkMoveOrdering);
 
-        add(new JLabel("PVS"));
-        checkPVS = new JCheckBox();
-        checkPVS.setSelected(true);
+        checkPVS = createCheckBox("PVS", DEF_USE_PVS);
         add(checkPVS);
 
-        add(new JLabel("Null move"));
-        checkNullMove = new JCheckBox();
-        checkNullMove.setSelected(true);
+        checkNullMove = createCheckBox("Null move", DEF_USE_NULL_MOVE);
         add(checkNullMove);
 
-        add(new JLabel("Quiescence"));
-        checkQuiescence = new JCheckBox();
-        checkQuiescence.setSelected(true);
+        checkQuiescence = createCheckBox("Quiescence", DEF_USE_QUIESCENE);
         add(checkQuiescence);
 
         SpinnerModel nullMoveRSpinnerModel = new SpinnerNumberModel(DEF_NULL_MOVE_R, 0, 5, 1);
@@ -76,6 +71,13 @@ public class PlayerPanel extends JPanel {
         add(new JLabel("Null Move R"));
         add(spinnerNullMoveR);
         ((JSpinner.DefaultEditor) spinnerNullMoveR.getEditor()).getTextField().setEditable(false);
+    }
+
+    public JCheckBox createCheckBox(String label, boolean defaultValue) {
+        add(new JLabel(label));
+        JCheckBox checkBox = new JCheckBox();
+        checkBox.setSelected(defaultValue);
+        return checkBox;
     }
 
     public Player getPlayer() {

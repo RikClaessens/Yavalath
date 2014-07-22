@@ -48,4 +48,12 @@ public class Util {
             default: return "";
         }
     }
+
+    public static String getTabs(int t) {
+        StringBuilder tabBuilder = new StringBuilder();
+        for (int i = 0; i < t; i++) {
+            tabBuilder.append("  ");
+        }
+        return tabBuilder.toString();
+    }
 }

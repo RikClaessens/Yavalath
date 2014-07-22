@@ -82,7 +82,7 @@ public class  YavalathGui extends JFrame implements MouseListener {
             public void keyPressed(KeyEvent e) {
             }
         });
-        pack();
+        setSize(750, 670);
     }
 
     public static void log(String log) {
@@ -90,7 +90,6 @@ public class  YavalathGui extends JFrame implements MouseListener {
 //        logPanel.paintImmediately(0, 0, logPanel.getWidth(), logPanel.getHeight());
     }
 
-    private static final long serialVersionUID = -1921481286866231418L;
     private JPanel contentPane;
 
     /**
@@ -138,5 +137,4 @@ public class  YavalathGui extends JFrame implements MouseListener {
         // TODO Auto-generated method stub
 
     }
-
 }
