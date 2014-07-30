@@ -57,6 +57,8 @@ public class IDNegamax implements Player {
     // Quiescence Search related variables
     private boolean useQuiescence;
 
+    private static int WIN_THRESHOLD = WIN_SCORE - 100;
+
     public IDNegamax(PlayerSettings playerSettings) {
         this.piece = playerSettings.piece;
         this.opponentPiece = playerSettings.getOpponentPiece(piece);
@@ -87,6 +89,9 @@ public class IDNegamax implements Player {
             idBestMove = bestMove;
             System.out.println("Search depth [" + depth + "], best move: " + bestMove + " score: " + score + " # of nodes visited " + nodesVisited);
 //            System.out.println("Visited " + nodesVisited + " nodes");
+            if (score > WIN_THRESHOLD) {
+                break;
+            }
         }
         System.out.println("Seleted move: " + idBestMove + ", # nodes: " + nodesVisited);
 
