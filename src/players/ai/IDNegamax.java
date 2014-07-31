@@ -8,6 +8,7 @@ import players.PlayerSettings;
 import players.ai.tt.TTEntry;
 import util.Util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -57,6 +58,11 @@ public class IDNegamax implements Player {
     // Quiescence Search related variables
     private boolean useQuiescence;
 
+    // Killer Move related variables
+    private boolean useKillerMoves;
+    private ArrayList<Integer>[] killerMoves;
+    private int numberOfKillerMoves;
+
     private static int WIN_THRESHOLD = WIN_SCORE - 100;
 
     public IDNegamax(PlayerSettings playerSettings) {
@@ -69,6 +75,8 @@ public class IDNegamax implements Player {
         this.usePVS = playerSettings.usePVS;
         this.useNullMove = playerSettings.useNullMove;
         this.useQuiescence = playerSettings.useQuiescence;
+        this.useKillerMoves = playerSettings.useKillerMoves;
+        this.numberOfKillerMoves = playerSettings.numberOfKillerMoves;
     }
 
     @Override
@@ -81,6 +89,8 @@ public class IDNegamax implements Player {
         principalVariationMoves = new int[globalMaxDepth][globalMaxDepth];
         // initialize the transposition table
         tt = new HashMap<Long, TTEntry>(TT_SIZE);
+        // reset the killer moves
+        killerMoves = new ArrayList[Board.NUMBER_OF_CELLS - numberOfMovesMadeBeforeSearch];
 
         int idBestMove = -1;
         for (int depth = 1; depth <= globalMaxDepth; depth++) {
@@ -93,7 +103,7 @@ public class IDNegamax implements Player {
                 break;
             }
         }
-        System.out.println("Seleted move: " + idBestMove + ", # nodes: " + nodesVisited);
+        System.out.println("Selected move: " + idBestMove + ", # nodes: " + nodesVisited);
 
         tt.clear();
         return idBestMove;
@@ -132,7 +142,10 @@ public class IDNegamax implements Player {
         if (useNullMove) {
             // do not use a null move when player is forced to play some moves, because this leads to instant loss
             // also do not allow 2 null moves follow each other
-            if (!board.allowedMovesForced() && board.numberOfMovesMade > 2 && board.numberOfMovesMade > Board.NUMBER_OF_FIELDS && board.movesMade[board.numberOfMovesMade - 1] != -1) {
+            if (!board.allowedMovesForced()
+                    && board.numberOfMovesMade > 2
+                    && board.numberOfMovesMade > Board.NUMBER_OF_FIELDS
+                    && board.movesMade[board.numberOfMovesMade - 1] != -1) {
                 board.doNullMove();
                 int value = -negamax(board, depth - nullMoveR - 1, -beta, -beta + 1, -color, currentMaxDepth);
                 board.undoNullMove();
@@ -160,7 +173,7 @@ public class IDNegamax implements Player {
         }
         // standard negamax
         int score = Integer.MIN_VALUE;
-        int[] moves = useMoveOrdering ? orderPVMoves(currentMaxDepth - depth, board, currentMaxDepth) : board.getAllowedMoves();
+        int[] moves = useMoveOrdering ? moveOrdering(currentMaxDepth - depth, board, currentMaxDepth) : board.getAllowedMoves();
         for (int child : moves) {
             board.doMove(child);
             if (currentMaxDepth < 4)
@@ -169,28 +182,19 @@ public class IDNegamax implements Player {
             if (currentMaxDepth < 4)
                 System.out.println(Util.getTabs(board.numberOfMovesMade - numberOfMovesMadeBeforeSearch) + "< " + child + " = " + value);
             board.undoMoveWithCheck(child);
-//            try {
-//                Thread.sleep(1);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
             if (value > score) {
                 score = value;
                 // keep track of best move found so far
                 if (depth == currentMaxDepth) {
 //                    System.out.println("\tNew best move " + child + " score " + score);
                     bestMove = child;
-                    if (currentMaxDepth == 5 && child == 2) {
-                        board.doMove(child);
-                        int test = -negamax(board, depth - 1, -beta, -alpha, -color, currentMaxDepth);
-                        board.undoMoveWithCheck(child);
-                    }
                 }
             }
             if (score > alpha) {
                 alpha = score;
             }
             if (score >= beta) {
+                saveKillerMove(board);
                 break;
             }
         }
@@ -210,6 +214,17 @@ public class IDNegamax implements Player {
             tt.put(board.hashKey, ttEntry);
         }
         return score;
+    }
+
+    public void saveKillerMove(Board board) {
+        int depth = board.numberOfMovesMade - numberOfMovesMadeBeforeSearch;
+        if (killerMoves[depth] == null) {
+            killerMoves[depth] = new ArrayList<Integer>();
+        }
+        killerMoves[depth].add(0, board.movesMade[board.numberOfMovesMade - 1]);
+        if (numberOfKillerMoves > 0 && killerMoves[depth].size() > numberOfKillerMoves) {
+            killerMoves[depth].remove(numberOfKillerMoves);
+        }
     }
 
     public int quiescence(Board board, int alpha, int beta, int color) {
@@ -270,23 +285,26 @@ public class IDNegamax implements Player {
     }
 
 
-    public int[] orderPVMoves(int depth, Board board, int currentMaxDepth) {
+    public int[] moveOrdering(int depth, Board board, int currentMaxDepth) {
         if (currentMaxDepth <= 1 || depth == 0) {
             return board.getAllowedMoves();
         }
-        HashSet<Integer> allowedMoves = board.getAllowedMoveSet();
-        int bestMoveForDepth = principalVariationMoves[currentMaxDepth - 2][currentMaxDepth - depth - 1];
-        if (bestMoveForDepth != 0 && allowedMoves.contains(bestMoveForDepth)) {
-            int[] moves = new int[allowedMoves.size()];
-            moves[0] = bestMoveForDepth;
-            int i = 1;
-            for (Integer val : allowedMoves) {
-                if (val != bestMoveForDepth) {
-                    moves[i++] = val;
+        HashSet<Integer> allowedMoves = new HashSet<>(board.getAllowedMoveSet());
+        ArrayList<Integer> orderedMoves = new ArrayList<>();
+        if (killerMoves[depth] != null) {
+            for (int killerMove : killerMoves[depth]) {
+                if (allowedMoves.contains(killerMove)) {
+                    orderedMoves.add(killerMove);
+                    allowedMoves.remove(killerMove);
                 }
             }
-            return moves;
         }
+        int bestMoveForDepth = principalVariationMoves[currentMaxDepth - 2][currentMaxDepth - depth - 1];
+        if (bestMoveForDepth != 0 && allowedMoves.contains(bestMoveForDepth)) {
+            orderedMoves.add(bestMoveForDepth);
+            allowedMoves.remove(bestMoveForDepth);
+        }
+        orderedMoves.addAll(allowedMoves);
         return Util.toIntArray(allowedMoves);
     }
 

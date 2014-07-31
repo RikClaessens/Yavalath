@@ -11,9 +11,11 @@ public class PlayerSettings {
     public boolean usePVS;
     public boolean useNullMove;
     public boolean useQuiescence;
+    public boolean useKillerMoves;
     public int nullMoveR;
     public int maxDepth;
     public int piece;
+    public int numberOfKillerMoves;
     public static int HUMAN = -1, IDNEGAMAX = 0, MINIMAX = 1;
 
     public int getOpponentPiece(int piece) {

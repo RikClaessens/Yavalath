@@ -24,12 +24,16 @@ public class PlayerPanel extends JPanel {
     private JCheckBox checkPVS;
     private JCheckBox checkNullMove;
     private JCheckBox checkQuiescence;
+    private JCheckBox checkKillerMoves;
     private JSpinner spinnerMaxDepth;
     private JSpinner spinnerNullMoveR;
+    private JSpinner spinnerKillerMoves;
     private static int DEF_MAX_DEPTH = 5;
     private static int DEF_NULL_MOVE_R = 2;
+    private static int DEF_KILLER_MOVES= 3;
     private static boolean DEF_USE_NULL_MOVE = false;
     private static boolean DEF_USE_QUIESCENE = true;
+    private static boolean DEF_USE_KILLER_MOVES = true;
     private static boolean DEF_USE_PVS = true;
     private static boolean DEF_USE_TT = true;
     private static boolean DEF_USE_MOVE_ORDERING = true;
@@ -60,17 +64,26 @@ public class PlayerPanel extends JPanel {
         checkPVS = createCheckBox("PVS", DEF_USE_PVS);
         add(checkPVS);
 
-        checkNullMove = createCheckBox("Null move", DEF_USE_NULL_MOVE);
-        add(checkNullMove);
-
         checkQuiescence = createCheckBox("Quiescence", DEF_USE_QUIESCENE);
         add(checkQuiescence);
+
+        checkNullMove = createCheckBox("Null move", DEF_USE_NULL_MOVE);
+        add(checkNullMove);
 
         SpinnerModel nullMoveRSpinnerModel = new SpinnerNumberModel(DEF_NULL_MOVE_R, 0, 5, 1);
         spinnerNullMoveR = new JSpinner(nullMoveRSpinnerModel);
         add(new JLabel("Null Move R"));
         add(spinnerNullMoveR);
         ((JSpinner.DefaultEditor) spinnerNullMoveR.getEditor()).getTextField().setEditable(false);
+
+        checkKillerMoves = createCheckBox("Killer Moves", DEF_USE_KILLER_MOVES);
+        add(checkKillerMoves);
+
+        SpinnerModel killerMoveSpinnerModel = new SpinnerNumberModel(DEF_KILLER_MOVES, 1, 60, 1);
+        spinnerKillerMoves = new JSpinner(killerMoveSpinnerModel);
+        add(new JLabel("# of Killer Moves"));
+        add(spinnerKillerMoves);
+        ((JSpinner.DefaultEditor) spinnerKillerMoves.getEditor()).getTextField().setEditable(false);
     }
 
     public JCheckBox createCheckBox(String label, boolean defaultValue) {
@@ -91,9 +104,11 @@ public class PlayerPanel extends JPanel {
             playerSettings.usePVS = checkPVS.isSelected();
             playerSettings.useMoveOrdering = checkMoveOrdering.isSelected();
             playerSettings.useQuiescence = checkQuiescence.isSelected();
+            playerSettings.useKillerMoves = checkKillerMoves.isSelected();
             playerSettings.maxDepth = (Integer) spinnerMaxDepth.getValue();
             playerSettings.useNullMove = checkNullMove.isSelected();
             playerSettings.nullMoveR = (Integer) spinnerNullMoveR.getValue();
+            playerSettings.numberOfKillerMoves = (Integer) spinnerKillerMoves.getValue();
 
             switch (comboPlayerList.getSelectedIndex()) {
                 case 1:
