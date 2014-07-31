@@ -1,0 +1,42 @@
+% !TEX root = ../yavalathreport.tex
+% Tikz ================================================
+\usetikzlibrary{arrows,bayesnet,calc,pgfplots.statistics,backgrounds,decorations.pathreplacing,decorations.markings,fadings,patterns,positioning,fit,shapes}
+\tikzstyle{graphnode}=[draw=thales-navyblue, ellipse, minimum width=35pt,align=center]
+\tikzstyle{graphnodesmall}=[draw=thales-navyblue, ellipse, align=center,inner sep=3pt]
+\tikzstyle{graphnoderect}=[draw=thales-navyblue, rectangle, minimum width=35pt,align=center,inner sep=10pt]
+\tikzstyle{graphnodeborderless}=[draw=none, minimum width=35pt,align=center,inner sep=10pt]
+\pgfplotsset{compat=1.10}
+\tikzset{hexa/.style= {shape=regular polygon,regular polygon sides=6,minimum size=1cm, draw,inner sep=0,anchor=south,fill=clrsyellow,rotate=30}}
+\tikzset{between/.style args={#1 and #2}{at = ($(#1)!0.5!(#2)$)}}
+\tikzset{between base/.style args={#1 and #2}{between=#1.base and #2.base}}
+\tikzset{between north/.style args={#1 and #2}{between=#1.north and #2.north}}
+\tikzset{between south/.style args={#1 and #2}{between=#1.south and #2.south}}
+\tikzset{
+  on each segment/.style={
+    decorate,
+    decoration={
+      show path construction,
+      moveto code={},
+      lineto code={
+        \path [#1,draw=none]
+        (\tikzinputsegmentfirst) -- (\tikzinputsegmentlast);
+      },
+      curveto code={
+        \path [#1,draw=none] (\tikzinputsegmentfirst)
+        .. controls
+        (\tikzinputsegmentsupporta) and (\tikzinputsegmentsupportb)
+        ..
+        (\tikzinputsegmentlast);
+      },
+      closepath code={
+        \path [#1,draw=none]
+        (\tikzinputsegmentfirst) -- (\tikzinputsegmentlast);
+      },
+    },
+  },
+  mid arrow/.style={postaction={decorate,decoration={
+        markings,
+        mark=at position .5 with {\arrow[#1]{stealth}}
+      }}},
+}
+% Tikz ================================================

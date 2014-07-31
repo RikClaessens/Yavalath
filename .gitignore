@@ -15,3 +15,24 @@ hs_err_pid*
 .idea/
 *.iml
 
+*.aux
+*.fdb_latexmk
+*.synctex.gz
+*.synctex.gz(busy)
+*.pdf
+*.log
+*.bbl
+*.blg
+*.toc
+*.bcf
+*.run.xml
+*.out
+*.lot
+*.lof
+*-blx.bib
+*.fls
+*.md5
+*.auxlock
+*.dpth
+*.dep
+*.ttf

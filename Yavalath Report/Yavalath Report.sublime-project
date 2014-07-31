@@ -1,0 +1,41 @@
+{
+	"folders":
+	[
+		{
+			"file_exclude_patterns":
+			[
+				"*.aux",
+				"*.bbl",
+				"*.blg",
+				"*.log",
+				"*.fdb_latexmk",
+				"*.synctex.gz",
+				"*.synctex.gz(busy)",
+				"*.pdf",
+				"*.bst",
+				"*.out",
+				"*.sty",
+				"*.toc",
+				"*.bcf",
+				"*.run.xml",
+				"*.lot",
+				"*.lof",
+				"*.fls",
+				"*-blx.bib",
+				"*.ttf",
+				"*.fls",
+				"*.md5",
+				"*.auxlock"
+			],
+			"folder_exclude_patterns":
+			[
+				"img",
+				"fonts"
+			],
+			"follow_symlinks": true,
+			"path": "."
+		}
+	],
+	"spell_check": true,
+	"dictionary": "Packages/Language - English/en_US.dic"
+}

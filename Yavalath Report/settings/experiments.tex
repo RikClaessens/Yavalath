@@ -1,0 +1,45 @@
+% !TEX root = ../yavalathreport.tex
+% 1: experiment name
+% 2: variable name
+% 3: short caption
+% 4: short caption
+% 5: label
+\newcommand{\experimentgraphs}[4]{
+	\begin{adjustwidth}{-\oddsidemargin-1cm}{-\rightmargin}
+		\begin{figure}[ht]
+			\captionsetup[subfloat]{captionskip=0em}
+			\subfloat[]{
+				\scalebox{.45}{
+					\includegraphics{generated/plots/#1/#2/tracks.pdf}
+				}
+			}
+			\captionsetup[subfloat]{captionskip=0em}
+			\subfloat[]{
+				\scalebox{.45}{
+					\includegraphics{generated/plots/#1/#2/trackerrors.pdf}
+				}
+			}
+			\captionsetup[subfloat]{captionskip=0em}
+			\subfloat[]{
+				\scalebox{.45}{
+					\includegraphics{generated/plots/#1/#2/rmse.pdf}
+				}
+			}
+			\caption[#3]{#4}
+			\label{fig:#1#2}
+		\end{figure}
+	\end{adjustwidth}
+}
+% 1: experiment name
+% 2: short caption
+% 3: short caption
+% 4: label
+\newcommand{\experimentscenario}[4]{
+	\begin{figure}[ht]\centering
+		\scalebox{.9}{
+			\includegraphics{generated/plots/#1/scenario.pdf}
+		}
+		\caption[#2]{#3} 
+		\label{fig:#4}
+	\end{figure}
+}

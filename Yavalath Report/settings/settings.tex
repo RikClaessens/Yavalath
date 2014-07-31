@@ -1,0 +1,109 @@
+% !TEX root = ../yavalathreport.tex
+% Use Packages ================================================
+\usepackage{
+	acronym,
+	adjustbox,
+	algorithm,
+	algpseudocode,
+	amscd,
+	amsfonts,
+	amsmath,
+	amssymb,
+	amsthm,
+	appendix,
+	caption,
+	chngpage,
+	filecontents,
+	%fontawesome,
+	fontspec,
+	fullpage,
+	geometry,
+	graphicx,
+	hyperref,
+	hyphenat,
+	listings,
+	mathdots,
+	mathtools,
+	multicol,
+	multirow,
+	pdfpages,
+	pgfplots, 
+	pgfplotstable,
+	setspace,
+	subfig,
+	tabularx,
+	tikz,
+	titling,
+	todonotes,
+	verbatim,
+	wrapfig,
+	xcolor
+}
+\usepackage[inline]{enumitem}
+% Use Packages ================================================
+
+% Bibliography ================================================
+\usepackage[
+		maxbibnames=3,
+		style=trad-abbrv,
+		url=false,
+		doi=false,
+		backend=biber,
+		urldate=long,
+		]{biblatex}
+
+\DefineBibliographyStrings{english}{%
+	urlseen = {Accessed:},
+}
+\bibliography{references/ref}
+% Bibliography ================================================
+
+
+
+% Custom defined settings and parameters ================================================
+\input{settings/acronyms.tex}
+\input{settings/tikz.tex}
+\input{settings/specialchars.tex}
+\input{settings/colors.tex}
+\input{settings/newcommands.tex}
+\input{settings/yavalath.tex}
+% Custom defined settings and parameters ================================================
+
+% Fonts ================================================
+\fontspec[Path = fonts/,
+    UprightFont = *-Light,
+    BoldFont = *-Bold
+    ]{Triplex}
+\newfontfamily{\FA}{FontAwesome Regular}
+\input{settings/fontawesome.tex}
+\newcommand{\faicon}[1]{{\FA \\\fa#1}}
+% Fonts ================================================
+
+% Custom defined labels for numbered entities ================================================
+\theoremstyle{plain} \numberwithin{equation}{section}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{finalremark}[theorem]{Final Remark}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{researchquestion}{RQ}
+% Custom defined labels for numbered entities ================================================
+
+
+\usepackage[absolute,overlay]{textpos}
+  \setlength{\TPHorizModule}{1mm}
+  \setlength{\TPVertModule}{1mm}
+
+  \def\changemargin#1#2{\list{}{\rightmargin#2\leftmargin#1}\item[]}
+  \let\endchangemargin=\endlist
+
+% Fix for footnotes being split over multiple pages
+\interfootnotelinepenalty=10000
+\raggedbottom
+\lstset{captionpos=b,frame=top,frame=bottom,basicstyle=\footnotesize}
+\newcommand{\listingspace}{\vspace{1em}}

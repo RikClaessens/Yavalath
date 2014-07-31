@@ -1,0 +1,44 @@
+% !TEX root = ../yavalathreport.tex
+% New Commands ================================================
+% Text stuff
+\newcommand{\ssth}[0]{\textsuperscript{th} }
+\newcommand{\ssst}[0]{\textsuperscript{st} }
+\newcommand{\ssnd}[0]{\textsuperscript{nd} }
+\newcommand{\ssrd}[0]{\textsuperscript{rd} }
+\newcommand{\q}[1]{``#1''}
+\newcommand{\eg}{e.g. }
+\newcommand{\ie}{i.e. }
+\newcommand{\st}{s.t. }
+\DeclarePairedDelimiter{\floor}{\lfloor}{\rfloor}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter\abs{\lvert}{\rvert}
+\newcommand{\bs}{\boldsymbol}
+\newcommand{\mc}{\mathcal}
+\newcommand{\placeholder}[1]{\textcolor{ummasterred}{\begin{center}PLACEHOLDER\end{center}{\fontspec{Triplex}#1}}}
+\makeatletter
+	\newcommand{\sumbracket}{\bBigg@{3}}
+	\newcommand{\bigbracket}{\bBigg@{4}}
+\makeatother
+
+% Symbols
+\newcommand{\independent}{\protect\mathpalette{\protect\independenT}{\perp}}\def\independenT#1#2{\mathrel{\setbox0\hbox{$#1#2$}\copy0\kern-\wd0\mkern4mu\box0}} 
+
+% Document wide changes
+\newcommand{\Numbering}[2]{\clearpage\pagenumbering{#1}\setcounter{page}{#2}}
+
+% Math
+\newcommand*\rfrac[2]{{}^{#1}\!/_{#2}}
+\newcommand{\mydot}[0]{\;\cdot\;}
+\newcommand{\mathspace}[0]{\hspace{-0.1em}}
+
+% Insertion of repeating commands
+\newcommand{\emptypage}{\newpage\thispagestyle{empty}\mbox{}}
+\newcommand{\emptypagewithpagenumber}{\newpage\thispagestyle{plain}\mbox{}}
+\newcommand{\algtab}{\Statex $\phantom{......}$}
+\newcommand{\alginputoutput}[2]{\Statex \textbf{Input:}#1\Statex \textbf{Output:} #2\Statex}
+\newcommand{\algcommentbox}[1]{\Comment{\makebox[115pt]{#1\hfill}}}
+\newcommand{\twopartdef}[4]{\begin{cases}#1, & \mbox{if } #2 \\ #3, & \mbox{if } #4\end{cases}}
+\newcommand{\twopartdefotherwise}[3]{\begin{cases}#1, & \mbox{if } #2 \\ #3, & \mbox{otherwise }\end{cases}}
+\newcommand{\sref}[1]{\protect\subref{#1}}
+\newcommand{\fsref}[2]{\ref{#1}.\protect\subref{#2}}
+% New Commands ================================================

@@ -1,0 +1,27 @@
+% !TEX root = ../yavalathreport.tex
+\newcommand{\whitestone}[2]{\draw [fill=clrswhite,minimum size=1cm] (h#1;#2) circle (0.35cm);}
+\newcommand{\blackstone}[2]{\draw [fill=clrsblack,minimum size=1cm] (h#1;#2) circle (0.35cm);}
+\newcommand{\blackstonelabel}[3]{
+	\draw [fill=clrsblack,minimum size=1cm] (h#1;#2) circle (0.35cm);
+	\node [circle,minimum size=1cm, color=clrswhite] at (h#1;#2) {#3};
+}
+\newcommand{\whitestonelabel}[3]{
+  \draw [fill=clrswhite,minimum size=1cm] (h#1;#2) circle (0.35cm);
+  \node [circle,minimum size=1cm, color=clrsblack] at (h#1;#2) {#3};
+}
+\newcommand{\yavalathboard}{
+	\foreach \j in {0,...,4}{%
+		\pgfmathsetmacro\end{4+\j} 
+		\foreach \i in {0,...,\end}{%
+			\node[hexa] (h\i;\j) at ({(\i-\j/2)*sin(60)},{\j*0.75}) {};
+		}
+	}
+	\foreach \j in {0,...,4}{%
+		\pgfmathsetmacro\end{8-\j} 
+		\foreach \i in {0,...,\end}{%
+			\pgfmathtruncatemacro\k{\j+4}  
+			\node[hexa] (h\i;\k) at ({(\i+\j/2-2)*sin(60)},{3+\j*0.75}) {};
+		}
+	} 
+}
+\def \yavalathboardsize {.5}
