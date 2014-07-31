@@ -9,6 +9,14 @@
   \draw [fill=clrswhite,minimum size=1cm] (h#1;#2) circle (0.35cm);
   \node [circle,minimum size=1cm, color=clrsblack] at (h#1;#2) {#3};
 }
+\newcommand{\blackstonelabelforced}[3]{
+	\draw [fill=clrsblack,minimum size=1cm] (h#1;#2) circle (0.35cm);
+	\node [circle,minimum size=1cm, color=clrsred] at (h#1;#2) {#3};
+}
+\newcommand{\whitestonelabelforced}[3]{
+  \draw [fill=clrswhite,minimum size=1cm] (h#1;#2) circle (0.35cm);
+  \node [circle,minimum size=1cm, color=clrsred] at (h#1;#2) {#3};
+}
 \newcommand{\yavalathboard}{
 	\foreach \j in {0,...,4}{%
 		\pgfmathsetmacro\end{4+\j} 
@@ -25,3 +33,4 @@
 	} 
 }
 \def \yavalathboardsize {.5}
+\def \yavalathboardsizesmall {.35}

@@ -21,15 +21,15 @@ Yavalath is played on board made up of a hexagonal grid of 61 cells. It is the f
 
 \listingspace
 \begin{lstlisting}[caption={The Yavalath definition in GDL}]
-(game Yavalath 	
-	(players White Black) 
-	(board (tiling hex) (shape hex) (size 5)) 
-	(pieces (Piece All (moves (move (pre (empty to)) 
-		(action (push))))))  
-	(end 
-		(All win (in-a-row 4)) 
-		(All lose (and (in-a-row 3) (not (in-a-row 4)))) 
-	) 
+(game Yavalath
+	(players White Black)
+	(board (tiling hex) (shape hex) (size 5))
+	(pieces (Piece All (moves (move (pre (empty to))
+		(action (push)))))) 
+	(end
+		(All win (in-a-row 4))
+		(All lose (and (in-a-row 3) (not (in-a-row 4))))
+	)
 )
 \end{lstlisting}
 \label{lst:yavalathgdl}
@@ -37,54 +37,48 @@ Yavalath is played on board made up of a hexagonal grid of 61 cells. It is the f
 
 As the game is defined in just these few lines, the rules are very straightforward. The game is played with 2 player, White and Black and is played on a hexagonal shaped board of size 5 (Figure \ref{fig:emptyboard}). Allowed moves consist of placing a stone on one of the free cells remaining on the board. A player wins if he completes a line of four but loses if he completes a line of three before. The commonly used swap rule is also used in Yavalath in order to avoid a too strong opening move option for White. 
 
-\begin{figure}[ht]
-	\centering{
-		\scalebox{\yavalathboardsize}{
-			\begin{tikzpicture}
-				\yavalathboard
-			\end{tikzpicture}
-		}
-	}
-	\caption{The Yavalath game board}
-	\label{fig:emptyboard}
-\end{figure}
+\input{figures/emptyboard.tex}
 
-One of the key aspects of Yavalath is the forcing move. When a player has - in any direction - a line consisting of one stone of his color, one free cell and then another two stone of his color, he forces his opponent to play a forced move. This is shown in Figure \ref{fig:forcedmoves}. By playing the move marked 1, White forces Black to play move 2, thereby forcing Black to create a line of three, which means that Black will lose. This tactic will prove essential for the developed agent as by using forced moves it is possible to limit your opponents options and in a way controlling where he is able to make his next move.
+One of the key aspects of Yavalath is the forcing move. When a player has - in any direction - a line consisting of one stone of his color, one free cell and then another two stone of his color, he forces his opponent to play a forced move. This is shown in Figure \ref{fig:forcedmoves}. By playing the move marked 1, White forces Black to play move 2 (forced moves are labeled in red), thereby forcing Black to create a line of three, which means that Black will lose. This mechanic will prove essential for the developed agent as by using forced moves it is possible to limit your opponents options and in a way controlling where he is able to make his next move.
 
-Its simple set of rules and the unique winning condition is what Yavalath is most famous for and what made it one of the most popular board games on the website \url{www.boardgamegeek.com}. 
+\input{figures/forcedmoves.tex}
 
-\begin{figure}[ht]
-	\centering{
-		\captionsetup[subfloat]{captionskip=0em}
-		\subfloat[]{
-			\scalebox{\yavalathboardsize}{
-				\begin{tikzpicture}
-					\yavalathboard
-					\blackstone{4}{3};
-					\blackstone{5}{5};
-					\whitestone{6}{4};
-					\whitestone{3}{4};
-				\end{tikzpicture}
-			}
-		}
-		\captionsetup[subfloat]{captionskip=0em}
-		\subfloat[]{
-			\scalebox{\yavalathboardsize}{
-				\begin{tikzpicture}
-					\yavalathboard
-					\blackstone{4}{3};
-					\blackstone{5}{5};
-					\whitestone{6}{4};
-					\whitestone{3}{4};
-					\whitestonelabel{4}{4}{1};
-					\blackstonelabel{5}{4}{2};
-				\end{tikzpicture}
-			}
-		}
-	}
-	\caption{An opportunity for White to force a move for Black}
-	\label{fig:forcedmoves}
-\end{figure}
+Its simple set of rules and the unique winning condition is what Yavalath is most famous for and what made it one of the most popular board games on the website \url{www.boardgamegeek.com}. The game could also be played with three players where the only difference is that a player that makes a line of three leaves the game, after which the game is continued until a player wins by creating a line of four or by being the only remaining in the game. Furthermore, the active player is required to play any moves that would be part of a line of four if the part of a line of four during a subsequent move of the player that has this position.
+
+\section{Evaluation Function}
+\label{-sec:evaluationfunction}
+
+Crucial for any AI player is a well-performing evaluation function. We discuss the Yavalath evaluation function according to seven principles as presented in \cite{Winands2004}. These seven principles include: \begin{enumerate*}\item threats, \item solid formations, \item mobility, \item blocking, \item centralisation, \item material advantage and \item initiative\end{enumerate*}.
+
+\subsection{Threats}
+\label{-subsec:threats}
+
+\subsection{Solid Formations}
+\label{-subsec:solidformations}
+There are a number of solid formations in the game of Yavalath. Forcing the opponent to make certain moves is a crucial aspect of Yavalath and it also place a strong role in determining strong formations. A number of these formations are described in \cite{browne2011evolutionary} and are shown in Figure \ref{fig:solidformations}. These triangles each form a basis on which White can force Black to play certain moves and, if Black fails to block the position in a proper way, will lead to a win for White.
+
+\input{figures/solidformations.tex}
+
+The strength of these triangle formation lies in the fact that they can be applied in three \emph{directions of play} and two \emph{rotations of play}. What we mean with this is that the first move can be played along one of three sides of the triangle as well as 2 rotations of the triangle.
+
+In addition to the formations presented in \cite{browne2011evolutionary} (Figure \ref{fig:solidformations}), we would like to add several combinations of lines of sizes 2, 3 and 4 with freedom within the line. These formations, along with the winning move sequence are presented in Figure \ref{fig:additionalsolidformations}.
+
+\input{figures/additionalsolidformations.tex}
+
+\subsection{Mobility}
+\label{-subsec:mobility}
+
+\subsection{Centralisation}
+\label{-subsec:centralisation}
+
+
+
+\subsection{Material Advantage}
+\label{-subsec:materialadvantage}
+
+\subsection{Initiative}
+\label{-subsec:initiative}
+
 
 	\nocite{*}
 	\printbibliography

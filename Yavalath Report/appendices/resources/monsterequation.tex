@@ -1,0 +1,174 @@
+% !TEX root = ../../yavalathreport.tex
+The Joint Probability Distribution (JPD) for area $k$, $JPD_k$:
+
+\begin{equation} \label{eq:app-monsterequationoriginal}
+	\begin{aligned}
+	JPD_k =\ & p(Moon)\ p(Weather)\ p(Time\ O\mathspace f\ Day)\ p(Season)\ p(Ranger\ Present)\\ 
+	\mydot& p(Vulnerability | Moon,\ Weather,\ Time\ O\mathspace f\ Day)\\
+	\mydot& p(Vegetation | Season)\ p(Water | Season)\\
+	\mydot& p(Rhino\ Present|Vegetation,\ Water)\\
+	\mydot& p(Rhino\ Sighted|Rhino\ Present)\\
+	\mydot& p(Rhino\ Track|Rhino\ Present)\\
+	\mydot& p(Poacher\ Present|Moon,\ Weather,\ Time\ O\mathspace f\ Day,\ Season,\ Rhino\ Present)\\
+	\mydot& p(Possible\ Poacher\ Sighted|Poacher\ Present)\\
+	\mydot& p(Poaching\ Event|Vulnerability,\ Poacher\ Present,\ Rhino\ Present,\ Ranger\ Present)\\
+	\mydot& p(Poaching\ Report|Poaching\ Event)\\
+	\end{aligned}
+\end{equation}
+
+\begin{figure}[ht]
+	\centering{
+		\scalebox{.6}{
+			\begin{tikzpicture}[node distance=1cm] 
+				\setlength\fboxsep{0pt}
+				\setlength\fboxrule{0pt}
+				\node[graphnode] 								(Moon) {Moon};
+				\node[graphnode, above right=of Moon] 			(Weather) {Weather};
+				\node[graphnode, above right=of Weather] 		(TimeOfDay) {Time Of Day};
+				\node[graphnode, draw=none,right=1cm of TimeOfDay] 		(Vegetation) {\phantom{Vegetation}};
+				\node[graphnode, below=0.75cm of Vegetation] 	(RhinoPresent) {Rhino Present};
+				\node[graphnode, below left=of RhinoPresent,shift={(0,0cm)}] 	(PoacherPresent) {Poacher Present};
+				\node[graphnode, below left=of PoacherPresent] 	(Vulnerability) {Vulnerability};
+				\node[graphnode, below=3cm of RhinoPresent] 	(PoachingEvent) {Poaching Event};
+				\node[graphnode, above right=of PoachingEvent] 	(RangerPresent) {Ranger Present};
+				\node[graphnode, below=of PoachingEvent] 		(PoachingReport) {Poaching Report};
+				\node[graphnode, dashed, above =0.15cm of PoacherPresent,shift={(-1.1cm,0)}] 				(T1) {$T_1^P$};
+				\node[graphnode, right=of T1, dashed, above =0.95cm of PoacherPresent,shift={(-0.65cm,0)}] 	(T2) {$T_2^P$};
+				\node[graphnode, right=of T2, dashed, above =0.95cm of PoacherPresent,shift={(0.65cm,0)}] 		(dots) {\makebox[\widthof{$T_1^P$}][c]{\phantom{$T_1^P$}\smash{\fbox{$\cdots$}}\phantom{$T_1^P$}}};
+				\node[graphnode, right=of dots, dashed, above =0.15cm of PoacherPresent,shift={(1.1cm,0)}] (Tn) {$T_n^P$};
+				\node[graphnode, dashed, above =0.15cm of RhinoPresent,shift={(-1.1cm,0)}] 				(T1R) {$T_1^R$};
+				\node[graphnode, right=of T1, dashed, above =0.95cm of RhinoPresent,shift={(-0.65cm,0)}] 	(T2R) {$T_2^R$};
+				\node[graphnode, right=of T2, dashed, above =0.95cm of RhinoPresent,shift={(0.65cm,0)}] 		(dotsR) {\makebox[\widthof{$T_1^R$}][c]{\phantom{$T_1^R$}\smash{\fbox{$\cdots$}}\phantom{$T_1^R$}}};
+				\node[graphnode, right=of dots, dashed, above =0.15cm of RhinoPresent,shift={(1.1cm,0)}] (TnR) {$T_n^R$};
+				\node[graphnode, dashed, above =0.15cm of RangerPresent,shift={(-1.1cm,0)}] 				(T1Ra) {$X_1^{R\mathspace a\mathspace P}$};
+				\node[graphnode, right=of T1, dashed, above =0.95cm of RangerPresent,shift={(-0.65cm,0)}] 	(T2Ra) {$X_2^{R\mathspace a\mathspace P}$};
+				\node[graphnode, right=of T2, dashed, above =0.95cm of RangerPresent,shift={(0.65cm,0)}] 		(dotsRa) {\makebox[\widthof{$X_1^{R\mathspace a\mathspace P}$}][c]{\phantom{$X_1^{R\mathspace a\mathspace P}$}\smash{\fbox{$\cdots$}}\phantom{$X_1^{R\mathspace a\mathspace P}$}}};
+				\node[graphnode, right=of dots, dashed, above =0.15cm of RangerPresent,shift={(1.1cm,0)}] (TnRa) {$X_n^{R\mathspace a\mathspace P}$};
+				\node[graphnode, above left= of dotsR] 		(Vegetation) {Vegetation};
+				\node[graphnode, above right=of Vegetation] 	(Season) {Season};
+				\node[graphnode, above right=of T2R] 			(Water) {Water};
+				\edge{Moon} {Vulnerability};
+				\edge{Weather} {Vulnerability};
+				\edge{TimeOfDay} {Vulnerability};
+				\edge{RhinoPresent} {PoachingEvent};
+				\edge{PoacherPresent} {PoachingEvent};
+				\edge{RangerPresent} {PoachingEvent};
+				\edge{PoachingEvent} {PoachingReport};
+				\edge{Vulnerability} {PoachingEvent};
+				\edge{T1} {PoacherPresent};
+				\edge{T2} {PoacherPresent};
+				\edge{dots} {PoacherPresent};
+				\edge{Tn} {PoacherPresent};
+				\edge{T1R} {RhinoPresent};
+				\edge{T2R} {RhinoPresent};
+				\edge{dotsR} {RhinoPresent};
+				\edge{TnR} {RhinoPresent};
+				\edge{T1Ra} {RangerPresent};
+				\edge{T2Ra} {RangerPresent};
+				\edge{dotsRa} {RangerPresent};
+				\edge{TnRa} {RangerPresent};
+				\edge{Season} {Vegetation};
+				\edge{Season}{Water};
+				\edge{Vegetation} {T1R};
+				\edge{Water} {T1R};
+				\edge{Vegetation} {T2R};
+				\edge{Water} {T2R};
+				\edge{Vegetation} {dotsR};
+				\edge{Water} {dotsR};
+				\edge{Vegetation} {TnR};
+				\edge{Water} {TnR};
+			\end{tikzpicture}
+		}
+	}
+	\caption{Updated model}
+	\label{fig:app-constructevidenceparentsupdated}
+\end{figure}
+
+\clearpage
+\begin{equation} \label{eq:app-monsterequationtracking}
+	\begin{aligned}
+	JPD_k =\ & p(PE|V\mathspace ul,PP,RP,RaP)p(PR|PE)\\
+	\mydot&p(V\mathspace ul|M,We,T)p(M)p(We)p(T)\\ 
+	\mydot& p(PP|T_1^P,\ldots,T_j^P)\prod_{j} p(T_j^P(k)|Z_{1:t}^P,E_{1:t}^P)\\
+	\mydot& p(RP|T_1^R,\ldots,T_l^R)\prod_{l} p(T_l^R(k)|Z_{1:t}^R,E_{1:t}^R)\\
+	\mydot& p(RaP|X_1^{RaP},\ldots,X_m^{RaP})\\
+	\end{aligned}
+\end{equation}
+
+\begin{comment}
+\begin{equation}\label{eq:app-derivedmonster}
+	\begin{aligned}
+		p(PE|Z_{1:t}^P,Z_{1:t}^R,E_{1:t}^P,E_{1:t}^R,E_{1:t}^M,X_{1:t}^{Ra})=\ &p(PE| X_{1:t}^P,X_{1:t}^R,X_{1:t}^{Ra},E_{1:t}^M)\\
+		\mydot&p(X_{1:t}^P|Z_{1:t}^P,E_{1:t}^P)\\
+		\mydot&p(X_{1:t}^R|Z_{1:t}^R,E_{1:t}^R)\\
+		=\ &p(PE| X_{1:t}^P,X_{1:t}^R,X_{1:t}^{Ra},E_{1:t}^M)\\
+		\mydot&\eta^Pp(Z_t^P|X_t^P)P(X_t^P|X_{t-1}^P,E_t^P)\\
+		\mydot&p(X_{1:t-1}^P|Z_{1:t-1}^P,E_{1:t-1}^P)p(C_t|X_t^P,E_t^P)\\
+		\mydot&\eta^Rp(Z_t^R|X_t^R)P(X_t^R|X_{t-1}^R,E_t^R)\\
+		\mydot&p(X_{1:t-1}^R|Z_{1:t-1}^R,E_{1:t-1}^R)p(C_t|X_t^R,E_t^R)\\
+	\end{aligned}
+\end{equation}
+
+\begin{tabular}{|c|l|}
+	\hline
+	$\ast^P$ & Poachers \\
+	\hline
+	$\ast^R$ & Rhinos \\
+	\hline
+	$\ast^{Ra}$ & Rangers \\
+	\hline
+	$\ast^M$ & Rhino Model \\
+	\hline
+    $Z_t^\ast$ & Observations \\
+    \hline
+    $X_t^\ast$ & Locations \\
+    \hline
+    $E_t^\ast$ & Evidence \\
+    \hline
+    $C_t$ & Corrective Factor \\
+    \hline
+    $PE$ & Poaching Event \\
+    \hline
+\end{tabular}\\
+\\
+\end{comment}
+\begin{adjustwidth}{-\oddsidemargin}{-\rightmargin+1cm}
+	\begin{equation} \label{eq:app-monsterequationmarginalization}
+		\begin{aligned}
+		p(PE|Z_{1:t}^P,Z_{1:t}^R,E_{1:t}^P,E_{1:t}^R,E_{1:t}^M,X_{1:t}^{Ra}) =\ & \sum_{PP}\sum_{RP}\sum_{V\mathspace ul}\sum_{R\mathspace a} \bigbracket[ p(PE|V\mathspace ul,PP, RP, R\mathspace a\mathspace P)p(PR|PE)\\
+		\mydot			& \sum_{W\mathspace e} \sumbracket[p(V\mathspace ul | M,\ W\mathspace e,\ T) p(M) p(W\mathspace e) p(T)\sumbracket]\\ 
+		\mydot			& \sum_{T_1^P}\ldots\sum_{T_j^P} \sumbracket[p(PP|T_1^P,\ldots,T_j^P)\prod_{j} p(T_j^P(k)|Z_{1:t}^P,E_{1:t}^P)\sumbracket]\\
+		\mydot			& \sum_{T_1^R}\ldots\sum_{T_l^R} \sumbracket[p(RP|T_1^R,\ldots,T_l^R)\prod_{l} p(T_l^R(k)|Z_{1:t}^R,E_{1:t}^R)\sumbracket]\\
+		\mydot			& \sum_{X_1^{R\mathspace a}}\ldots\sum_{X_m^{R\mathspace a}}\sumbracket[p(R\mathspace a\mathspace P|X_1^{R\mathspace a},\ldots,X_m^{R\mathspace a})\sumbracket]\bigbracket]\\
+		\end{aligned}
+	\end{equation}
+\end{adjustwidth}
+
+\begin{tabular}{|c|l|}
+	\hline
+	$p(PE|\ldots)$ & $p(PE|Z_{1:t}^P,Z_{1:t}^R,E_{1:t}^P,E_{1:t}^R,E_{1:t}^M,X_{1:t}^{Ra})$\\
+	\hline
+	$PE$ & Poaching Event \\
+	\hline
+	$PR$ & Poaching Report \\
+	\hline
+	$V\mathspace ul$ & Vulnerability \\
+	\hline
+	$M$ & Moon \\
+	\hline
+	$W\mathspace e$ & Weather \\
+	\hline
+    $T\ast$ & Time of Day \\
+    \hline
+    $PP$ & Poacher Present \\
+    \hline
+    $RP$ & Rhino Present \\
+    \hline
+    $S$ & Season \\
+    \hline
+    $V$ & Vegetation \\
+    \hline
+    $W\mathspace a$ & Water \\
+    \hline
+\end{tabular}\\
+\\

@@ -1,0 +1,75 @@
+{ "Targets" : 
+  [ { "name": "Target 1",
+      "location": {"x": 5, "y": 85, "z": 0},
+      "route": 
+      [ {"x": 55, "y": 85, "z": 0},
+        {"x": 55, "y": 55, "z": 0},
+        {"x": 85, "y": 55, "z": 0},
+        {"x": 85, "y": 15, "z": 0},
+        {"x":  5, "y": 15, "z": 0}, ],
+      "speed": 0.1,
+      "repeat": 0 } ],
+  "Decoys" : 
+  [ { "name": "Decoy 1",
+      "location": {"x": 65, "y": 65, "z": 0},
+      "route": [
+        {"x": 65, "y": 65, "z": 0},
+        {"x": 65, "y": 85, "z": 0}
+      ],
+      "rate": 150,
+      "repeat": -1,
+      "speed": 1 } ],
+  "Sensors": 
+  { "Radars": 
+    [ { "name": "Radar 1",
+        "location": {"x": 55, "y": 50, "z": 0},
+        "range": 200,
+        "timestep": 100,
+        "lag": 0,
+        "noise": 0.1,
+        "detectionProbability": 0.9999,
+        "activated": true } ],
+    "UAVs": 
+    [ { "name": "UAV 1",
+        "location": {"x": 50, "y": 10, "z": 0},
+        "route": 
+        [ {"x": 75, "y": 10, "z": 0},
+          {"x": 50, "y": 15, "z": 0},
+          {"x": 25, "y": 10, "z": 0} ],
+        "range": 40,
+        "timestep": 10,
+        "lag": 0,
+        "speed": 0.3,
+        "repeat": -1,
+        "noise": 0.5,
+        "detectionProbability": 0.8,
+        "activated": true } ]
+  },
+  "ContextData": 
+  [ { "lt": {"x":   0, "y":  0, "z": 0},
+      "rb": {"x": 100, "y": 50, "z": 0},
+      "correctiveFactor": 1 },
+    { "lt": {"x":   0, "y":  50, "z": 0},
+      "rb": {"x": 100, "y": 100, "z": 0},
+      "correctiveFactor": 0.5 } ],
+  "ParticleFilter": 
+  { "stateModelNoise": 0.02,
+    "measurementModelNoise": 10,
+    "associationSigma": 10,
+    "movingAverageWindow": 2 },
+  "TrackingWorld": {
+    "killTrackAfterSteps": 100,
+    "varianceThreshold": 50,
+    "noOfParticlesPerTrack": 500,
+    "initialPositionNoise": 5,
+    "initialVelocityNoise": 0.05,
+    "staticObjectObservationProbability": 0.0,
+    "newTargetProbability": 0.0001,
+    "falseAlarmProbability": 0.01,
+    "combineSensorReportsThreshold": 1,
+    "correctiveFactorDistance": 10,
+    "resamplingStrategy": "AVG_LOCATION_CF_ZERO",
+    "cfUpdateStrategy": "ONCHANGE",
+    "killTrackStrategy": "VARIANCE_THRESHOLD",
+    "oosmStrategy": "DISCARD" }
+}

@@ -1,0 +1,33 @@
+% !TEX root = ../yavalathreport.tex
+\begin{figure}[ht]
+	\centering{
+		\captionsetup[subfloat]{captionskip=0em}
+		\subfloat[]{
+			\scalebox{\yavalathboardsize}{
+				\begin{tikzpicture}
+					\yavalathboard
+					\blackstone{4}{3};
+					\blackstone{5}{5};
+					\whitestone{6}{4};
+					\whitestone{3}{4};
+				\end{tikzpicture}
+			}
+		}
+		\captionsetup[subfloat]{captionskip=0em}
+		\subfloat[]{
+			\scalebox{\yavalathboardsize}{
+				\begin{tikzpicture}
+					\yavalathboard
+					\blackstone{4}{3};
+					\blackstone{5}{5};
+					\whitestone{6}{4};
+					\whitestone{3}{4};
+					\whitestonelabel{4}{4}{1};
+					\blackstonelabelforced{5}{4}{2};
+				\end{tikzpicture}
+			}
+		}
+	}
+	\caption{An opportunity for White to force a move for Black}
+	\label{fig:forcedmoves}
+\end{figure}
