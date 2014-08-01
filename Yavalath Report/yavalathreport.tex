@@ -50,8 +50,23 @@ Its simple set of rules and the unique winning condition is what Yavalath is mos
 
 Crucial for any AI player is a well-performing evaluation function. We discuss the Yavalath evaluation function according to seven principles as presented in \cite{Winands2004}. These seven principles include: \begin{enumerate*}\item threats, \item solid formations, \item mobility, \item blocking, \item centralisation, \item material advantage and \item initiative\end{enumerate*}.
 
+\subsection{Inapplicable evaluation function features}
+\label{-subsec:inapplicableevaluationfunctionfeatures}
+First we describe the features that are inapplicable for Yavalath and why that is the case.
+
+\subsubsection{Mobility}
+\label{-subsubsec:mobility}
+As there are no restrictions where a player is able to move and pieces are not moved across the board, but instead placed at empty squares, mobility does not play a role in Yavalath.
+
+\subsubsection{Material Advantage}
+\label{-subsubsec:materialadvantage}
+Another feature that is in inapplicable for Yavalath is material advantage. This is the case because pieces cannot be captured by other players. Therefore, the number of pieces on the board is equal to the number of moves made thus far and all players will have the same number of pieces on the board after a complete game round.
+
 \subsection{Threats}
 \label{-subsec:threats}
+A returning aspect of Yavalath is forcing your opponent to make certain moves. In this way one is able to limit his opponents options. A formation that could lead to a forced move for the player can therefore be seen as a threat. This is the case when in any straight line of four fields, there are three pieces of the opponent's color and one free field in between (Figure \ref{fig:threat}).
+
+\input{figures/threat.tex}
 
 \subsection{Solid Formations}
 \label{-subsec:solidformations}
@@ -65,20 +80,23 @@ In addition to the formations presented in \cite{browne2011evolutionary} (Figure
 
 \input{figures/additionalsolidformations.tex}
 
-\subsection{Mobility}
-\label{-subsec:mobility}
+These additional formations do not have the advantage that they can be played in any direction like the formations in Figure \ref{fig:solidformations}. However, it is clear that formations that can be used to force the opponent to move are crucial in Yavalath.
 
 \subsection{Centralisation}
 \label{-subsec:centralisation}
+Another part of the evaluation function for the game of Yavalath is centralisation. The intuition behind this feature is that playing near the center of the board gives the player more options to choose from, \ie more directions to play in. Therefore we give all fields a score, based on the distance to the center. These scores are shown in Figure \ref{fig:scores}.
 
+\input{figures/scores.tex}
 
-
-\subsection{Material Advantage}
-\label{-subsec:materialadvantage}
+However, because of the swap rulex, we remove the bonus for the central two hexagonal circles (all fields with scores of $40$ or $50$) for the first move if the AI player is White. This is to prevent the player from playing a move that will very likely be swapped during Black's first move anyway, thereby losing his first move advantage.
 
 \subsection{Initiative}
 \label{-subsec:initiative}
+The last evaluation function principle proposed by \cite{Winands2004} is initiative. Obtaining the initiative in the game of Yavalath is useful for forcing moves by the opponent, thereby limiting his options and with that his ability to force moves for the AI player. Because of this the sooner, a move can be forced by the AI player, the better.
 
+\section{$\alpha\beta$-enhancements}
+\label{-sec:alphabeta-enhancements}
+In this section we describe a number of enhancements made to the general $\alpha\beta$-framework. These include
 
 	\nocite{*}
 	\printbibliography

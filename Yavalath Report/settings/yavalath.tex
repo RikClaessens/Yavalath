@@ -17,6 +17,9 @@
   \draw [fill=clrswhite,minimum size=1cm] (h#1;#2) circle (0.35cm);
   \node [circle,minimum size=1cm, color=clrsred] at (h#1;#2) {#3};
 }
+\newcommand{\labelonly}[4]{
+	\node [circle,minimum size=1cm, color=clrs#4] at (h#1;#2) {#3};
+}
 \newcommand{\yavalathboard}{
 	\foreach \j in {0,...,4}{%
 		\pgfmathsetmacro\end{4+\j} 
@@ -31,6 +34,11 @@
 			\node[hexa] (h\i;\k) at ({(\i+\j/2-2)*sin(60)},{3+\j*0.75}) {};
 		}
 	} 
+}
+\newcommand{\yavalathline}[1]{
+	\foreach \i in {1,...,#1}{%
+		\node[hexa] (h\i;0) at ({(\i)*sin(60)},{0*0.75}) {};
+	}
 }
 \def \yavalathboardsize {.5}
 \def \yavalathboardsizesmall {.35}
