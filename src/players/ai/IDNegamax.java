@@ -192,11 +192,11 @@ public class IDNegamax implements Player {
         int[] moves = useMoveOrdering ? moveOrdering(currentMaxDepth - depth, board, currentMaxDepth) : board.getAllowedMoves();
         for (int child : moves) {
             board.doMove(child);
-            if (currentMaxDepth < 4)
-                System.out.println(Util.getTabs(board.numberOfMovesMade - numberOfMovesMadeBeforeSearch) + "> " + child);
+//            if (currentMaxDepth < 4)
+//                System.out.println(Util.getTabs(board.numberOfMovesMade - numberOfMovesMadeBeforeSearch) + "> " + child);
             int value = -negamax(board, depth - 1, -beta, -alpha, -color, currentMaxDepth);
-            if (currentMaxDepth < 4)
-                System.out.println(Util.getTabs(board.numberOfMovesMade - numberOfMovesMadeBeforeSearch) + "< " + child + " = " + value);
+//            if (currentMaxDepth < 4)
+//                System.out.println(Util.getTabs(board.numberOfMovesMade - numberOfMovesMadeBeforeSearch) + "< " + child + " = " + value);
             board.undoMoveWithCheck(child);
             if (value > score) {
                 score = value;
