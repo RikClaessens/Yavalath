@@ -94,9 +94,45 @@ However, because of the swap rulex, we remove the bonus for the central two hexa
 \label{-subsec:initiative}
 The last evaluation function principle proposed by \cite{Winands2004} is initiative. Obtaining the initiative in the game of Yavalath is useful for forcing moves by the opponent, thereby limiting his options and with that his ability to force moves for the AI player. Because of this the sooner, a move can be forced by the AI player, the better.
 
-\section{$\alpha\beta$-enhancements}
+\section{\texorpdfstring{$\boldsymbol{\alpha\beta}$}{alphabeta}-enhancements}
 \label{-sec:alphabeta-enhancements}
-In this section we describe a number of enhancements made to the general $\alpha\beta$-framework. These include
+In this section we describe a number of enhancements made to the general $\alpha\beta$-framework. These include \begin{enumerate*}\item move ordering, \item a transposition table, \item killer moves, \item null moves, \item quiescence search and \item the relative history heuristic\end{enumerate*}
+
+As a first remark, although the AI player will not participate in a tournament, it still makes use of iterative deepening in order to stay as close as possible to an AI player that could be used in a real game or tournament. Iterative deepening performs the same $\alpha\beta$-search for increasing depth, starting at depth $1$. The costs of the repeated search can be compensated by using a number of enhancements to increase the number of $\alpha\beta$-cutoffs when searching at increased depths, especially when using a transposition table.
+
+\subsection{Transposition Table}
+\label{-subsec:transpositiontable}
+In games where it is possible to obtain the same board position after different move sequences, it is possible to use a transposition table to speed up the search. This speed-up is achieved by storing already evaluated positions, along with the obtained value and the depth at which the position was evaluated. Then, when the position appears again while traversing the tree, the previously obtained result can be used if the remaining search depth is equal or smaller for the current position.
+
+For this, a set of $3\times 61$ random numbers is used to create a zobirst hash-value for a position. This hash is used to store and retrieve a transposition.
+
+\subsection{Null Moves}
+\label{-subsec:nullmoves}
+The idea of null moves is that any position on which a player is able to forfeit a move and remains a strong position, will be an even stronger position when he would have made a move. In Yavalath, we do not allow null moves when a player is forced to make a move. Furthermore, we do not allow two consecutive null moves as this would allow the opponent in a lot of situations to create positions that leads to forced moves by the player. This does not help the search as it gives a pessimistic evaluation of the position under consideration.
+
+\subsection{Relative History Heuristic}
+\label{-subsec:relativehistoryheuristic}
+Instead of a static move ordering, the relative history heuristic can be used. Simply said, the heuristic increases the score of each move that has produced a cut off and the number of times it didn't. The relative history heuristic now defines the score of a move as:
+
+\begin{equation}
+	move\ score = \frac{hh\ score}{bf\ score},
+\end{equation}
+
+where the $hh\ score$ is the history heuristic score and $bf\ score$ is the butterfly score \cite{Winands2004}. As suggested in the same thesis, the $hh\ score$ and $bf\ score$ are both incremented by one in case of a cut-off and no cut-off respectively. This move ordering is used after the killer move and transposition table move have been evaluated.
+
+\subsection{Move ordering}
+\label{-subsec:moveordering}
+Before moves are evaluated at a certain depth, the allowed moves are sorted. The goal of this move ordering is to achieve an $\alpha\beta$-cutoff as soon as possible. The sooner a cutoff is achieved, the more the search is sped up. Several techniques suggest good moves to try first at a certain depth, killer moves, principal variation search and transposition tables. Generally, if allowed null moves are tried first. Then, as this gives us the most reliable information, the retrieved move from the transposition table is performed, then the principal variation of the last iteration and finally the killer moves are played. Then the relative history heuristic can sort the remaining moves based on the number of times they appeared in the search. However, a static move ordering is used if this feature is disabled. This static move ordering is shown in Figure \ref{fig:staticmoveordering}.
+
+\input{figures/moveordering.tex}
+
+Moves are considered in an outwards spiraling order, as playing near the center gives the player most opportunities to create strong positions.
+
+\section{Acknowledgments}
+\label{-sec:acknowledgments}
+
+
+For displaying the board an existing display engine was used, published on Github by user silverio (\url{https://github.com/silverio/samples}).
 
 	\nocite{*}
 	\printbibliography
