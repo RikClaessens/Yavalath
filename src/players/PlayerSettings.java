@@ -12,6 +12,7 @@ public class PlayerSettings {
     public boolean useNullMove;
     public boolean useQuiescence;
     public boolean useKillerMoves;
+    public boolean useRelativeHistoryHeuristic;
     public int nullMoveR;
     public int maxDepth;
     public int piece;

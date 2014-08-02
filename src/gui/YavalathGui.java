@@ -58,7 +58,7 @@ public class  YavalathGui extends JFrame implements MouseListener {
         settingsPanel.add(controlPanel);
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setBounds(100, 100, 774, 502);
+
 
         setFocusable(true);
 
@@ -82,7 +82,8 @@ public class  YavalathGui extends JFrame implements MouseListener {
             public void keyPressed(KeyEvent e) {
             }
         });
-        setSize(750, 670);
+        pack();
+        setBounds(100, 100, 800, getHeight());
     }
 
     public static void log(String log) {

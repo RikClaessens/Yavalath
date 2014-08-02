@@ -25,6 +25,7 @@ public class PlayerPanel extends JPanel {
     private JCheckBox checkNullMove;
     private JCheckBox checkQuiescence;
     private JCheckBox checkKillerMoves;
+    private JCheckBox checkRelativeHistoryHeuristic;
     private JSpinner spinnerMaxDepth;
     private JSpinner spinnerNullMoveR;
     private JSpinner spinnerKillerMoves;
@@ -37,6 +38,7 @@ public class PlayerPanel extends JPanel {
     private static boolean DEF_USE_PVS = true;
     private static boolean DEF_USE_TT = true;
     private static boolean DEF_USE_MOVE_ORDERING = true;
+    private static boolean DEF_USE_RELATIVE_HISTORY_HEURISTIC = true;
     private int piece;
 
     public PlayerPanel(int piece) {
@@ -84,6 +86,9 @@ public class PlayerPanel extends JPanel {
         add(new JLabel("# of Killer Moves"));
         add(spinnerKillerMoves);
         ((JSpinner.DefaultEditor) spinnerKillerMoves.getEditor()).getTextField().setEditable(false);
+
+        checkRelativeHistoryHeuristic = createCheckBox("Rel. His. Heuristic", DEF_USE_RELATIVE_HISTORY_HEURISTIC);
+        add(checkRelativeHistoryHeuristic);
     }
 
     public JCheckBox createCheckBox(String label, boolean defaultValue) {
@@ -109,6 +114,7 @@ public class PlayerPanel extends JPanel {
             playerSettings.useNullMove = checkNullMove.isSelected();
             playerSettings.nullMoveR = (Integer) spinnerNullMoveR.getValue();
             playerSettings.numberOfKillerMoves = (Integer) spinnerKillerMoves.getValue();
+            playerSettings.useRelativeHistoryHeuristic = checkRelativeHistoryHeuristic.isSelected();
 
             switch (comboPlayerList.getSelectedIndex()) {
                 case 1:

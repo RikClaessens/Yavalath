@@ -40,6 +40,11 @@ public class IDNegamax implements Player {
 
     // Move Ordering related variables
     private boolean useMoveOrdering;
+    public static int[] staticMoveOrder = new int[]{40,
+            30,31,41,49,48,39,
+            29,21,22,23,32,42,50,59,58,57,47,38,
+            28,20,11,12,13,14,24,33,43,51,60,68,67,66,65,56,46,37,
+            27,19,10,2,3,4,5,6,15,25,34,44,52,61,69,78,77,76,75,74,64,55,45,36};
 
     // Principal variation related variables
     private int[][] principalVariationMoves;
@@ -63,6 +68,13 @@ public class IDNegamax implements Player {
     private ArrayList<Integer>[] killerMoves;
     private int numberOfKillerMoves;
 
+    // Relative History Heuristic related variables
+    private boolean useRelativeHistoryHeuristic;
+    private int[] hhScore;
+    private int[] bfScore;
+    private int hhIncrement = 1;
+    private int bfIncrement = 1;
+
     private static int WIN_THRESHOLD = WIN_SCORE - 100;
 
     public IDNegamax(PlayerSettings playerSettings) {
@@ -77,6 +89,7 @@ public class IDNegamax implements Player {
         this.useQuiescence = playerSettings.useQuiescence;
         this.useKillerMoves = playerSettings.useKillerMoves;
         this.numberOfKillerMoves = playerSettings.numberOfKillerMoves;
+        this.useRelativeHistoryHeuristic = playerSettings.useRelativeHistoryHeuristic;
     }
 
     @Override
@@ -91,6 +104,9 @@ public class IDNegamax implements Player {
         tt = new HashMap<Long, TTEntry>(TT_SIZE);
         // reset the killer moves
         killerMoves = new ArrayList[Board.NUMBER_OF_CELLS - numberOfMovesMadeBeforeSearch];
+        // reset the counters for the history and butterfly score
+        hhScore = new int[Board.NUMBER_OF_CELLS];
+        bfScore = new int[Board.NUMBER_OF_CELLS];
 
         int idBestMove = -1;
         for (int depth = 1; depth <= globalMaxDepth; depth++) {
@@ -160,7 +176,7 @@ public class IDNegamax implements Player {
             int value;
             // Quiescence Search
             if (useQuiescence) {
-                value = quiescence(board, alpha, beta, color);
+                value = quiescence(board, depth, alpha, beta, color, currentMaxDepth);
             } else {
                 value = color * evaluate(board);
             }
@@ -195,7 +211,10 @@ public class IDNegamax implements Player {
             }
             if (score >= beta) {
                 saveKillerMove(board);
+                hhScore[child] += hhIncrement;
                 break;
+            } else {
+                bfScore[child] += bfIncrement;
             }
         }
 
@@ -227,7 +246,7 @@ public class IDNegamax implements Player {
         }
     }
 
-    public int quiescence(Board board, int alpha, int beta, int color) {
+    public int quiescence(Board board, int depth, int alpha, int beta, int color, int currentMaxDepth) {
         int score = color * evaluate(board);
         if (score >= beta) {
             return score;
@@ -235,13 +254,13 @@ public class IDNegamax implements Player {
         if (score > alpha) {
             alpha = score;
         }
-        int[] moves = board.getAllowedMoves();
+        int[] moves = useMoveOrdering ? moveOrdering(currentMaxDepth, board, currentMaxDepth) : board.getAllowedMoves();
         for (int child : moves) {
             if (!wouldForceAMove(board, child)) {
                 continue;
             }
             board.doMove(child);
-            int result = -quiescence(board, -beta, -alpha, -color);
+            int result = -quiescence(board, depth, -beta, -alpha, -color, currentMaxDepth);
             board.undoMoveWithCheck(child);
             if (result > score) {
                 score = result;
@@ -299,14 +318,80 @@ public class IDNegamax implements Player {
                 }
             }
         }
-        int bestMoveForDepth = principalVariationMoves[currentMaxDepth - 2][currentMaxDepth - depth - 1];
-        if (bestMoveForDepth != 0 && allowedMoves.contains(bestMoveForDepth)) {
-            orderedMoves.add(bestMoveForDepth);
-            allowedMoves.remove(bestMoveForDepth);
+        if (currentMaxDepth - 2 >0 && currentMaxDepth - depth - 1 > 0) {
+            int bestMoveForDepth = principalVariationMoves[currentMaxDepth - 2][currentMaxDepth - depth - 1];
+            if (bestMoveForDepth != 0 && allowedMoves.contains(bestMoveForDepth)) {
+                orderedMoves.add(bestMoveForDepth);
+                allowedMoves.remove(bestMoveForDepth);
+            }
         }
-        orderedMoves.addAll(allowedMoves);
-        return Util.toIntArray(allowedMoves);
+        if (useRelativeHistoryHeuristic) {
+            int[] scores = new int[Board.NUMBER_OF_FIELDS];
+            for (int i = 0; i < staticMoveOrder.length; i++) {
+                if (bfScore[staticMoveOrder[i]] != 0) {
+                    scores[i] = hhScore[staticMoveOrder[i]] / bfScore[staticMoveOrder[i]];
+                } else {
+                    scores[i] = 0;
+                }
+            }
+            int[] sorted = sort(scores);
+            for (int i = 0; i < sorted.length; i++) {
+                if (allowedMoves.contains(sorted[i])) {
+                    orderedMoves.add(sorted[i]);
+                    allowedMoves.remove(sorted[i]);
+                }
+            }
+        } else {
+            for (int move = 0; move < staticMoveOrder.length; move++) {
+                if (allowedMoves.contains(move)) {
+                    orderedMoves.add(move);
+                    allowedMoves.remove(move);
+                }
+            }
+        }
+        return Util.toIntArray(orderedMoves);
     }
+
+    public int[] sort(int[] scores) {
+        int[] sorted = new int[scores.length];
+        for (int i = 0; i < scores.length; i++) {
+            sorted[i] = staticMoveOrder[i];
+        }
+        boolean swapped = true;
+        int n = scores.length;
+        while (swapped) {
+            swapped = false;
+            for (int i = 1; i <= n-1; i++) {
+                if (scores[i - 1] > scores[i]) {
+                    int temp = scores[i];
+                    scores[i] = scores[i - 1];
+                    scores[i - 1] = temp;
+
+                    temp = sorted[i];
+                    sorted[i] = sorted[i - 1];
+                    sorted[i - 1] = temp;
+                    swapped = true;
+                }
+            }
+        }
+        return sorted;
+    }
+
+    /*
+        procedure bubbleSort( A : list of sortable items )
+    n = length(A)
+    repeat
+       swapped = false
+       for i = 1 to n-1 inclusive do
+          if A[i-1] > A[i] then
+             swap(A[i-1], A[i])
+             swapped = true
+          end if
+       end for
+       n = n - 1
+    until not swapped
+end procedure
+     */
 
     public String printMoves(Board board) {
         StringBuilder moveBuilder = new StringBuilder();

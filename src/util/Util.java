@@ -3,6 +3,7 @@ package util;
 import game.Board;
 import org.apache.commons.math3.random.MersenneTwister;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
@@ -20,6 +21,13 @@ public class Util {
     }
 
     public static int[] toIntArray(HashSet<Integer> set) {
+        int[] a = new int[set.size()];
+        int i = 0;
+        for (Integer val : set) a[i++] = val;
+        return a;
+    }
+
+    public static int[] toIntArray(ArrayList<Integer> set) {
         int[] a = new int[set.size()];
         int i = 0;
         for (Integer val : set) a[i++] = val;
