@@ -35,11 +35,11 @@ Yavalath is played on board made up of a hexagonal grid of 61 cells. It is the f
 \label{lst:yavalathgdl}
 \listingspace
 
-As the game is defined in just these few lines, the rules are very straightforward. The game is played with 2 player, White and Black and is played on a hexagonal shaped board of size 5 (Figure \ref{fig:emptyboard}). Allowed moves consist of placing a stone on one of the free cells remaining on the board. A player wins if he completes a line of four but loses if he completes a line of three before. The commonly used swap rule is also used in Yavalath in order to avoid a too strong opening move option for White. 
+As the game can be defined in just these few lines, the rules are very straightforward. The game is played with 2 player, White and Black and is played on a hexagonal shaped board of size 5 (Figure \ref{fig:emptyboard}). Allowed moves consist of placing a stone on one of the free cells remaining on the board. A player wins if he completes a line of four but loses if he completes a line of three before. The commonly used swap rule is also used in Yavalath in order to avoid a too strong opening move option for White. 
 
 \input{figures/emptyboard.tex}
 
-One of the key aspects of Yavalath is the forcing move. When a player has - in any direction - a line consisting of one stone of his color, one free cell and then another two stone of his color, he forces his opponent to play a forced move. This is shown in Figure \ref{fig:forcedmoves}. By playing the move marked 1, White forces Black to play move 2 (forced moves are labeled in red), thereby forcing Black to create a line of three, which means that Black will lose. This mechanic will prove essential for the developed agent as by using forced moves it is possible to limit your opponents options and in a way controlling where he is able to make his next move.
+One of the key aspects of Yavalath is the forcing move. When a player has - in any direction - a line consisting of one stone of his color, one free cell and then another two stone of his color, he forces his opponent to play the move on the free field (or one of multiple fields with the same configuration). This is shown in Figure \ref{fig:forcedmoves}. By playing the move marked 1, White forces Black to play move 2 (forced moves are labeled in red), thereby forcing Black to create a line of three, which means that Black will lose. This mechanic will prove essential for the developed agent as by using forced moves it is possible to limit your opponents options and in a way controlling where he is able to make his next move.
 
 \input{figures/forcedmoves.tex}
 
@@ -77,7 +77,7 @@ A returning aspect of Yavalath is forcing your opponent to make certain moves. I
 
 \input{figures/threat.tex}
 
-
+A threat is evaluated as a penalty of $50$. This value was chosen to not let this feature to become overly strong. As it is possible that being forced to move does not present any immediate danger for losing. It was observed that the developed AI player would start blocking off every threat there was, which lead him to ignore his own strong positions and this strategy would often result in a loss.
 
 \subsection{Solid Formations}
 \label{-subsec:solidformations}
@@ -92,6 +92,10 @@ In addition to the formations presented in \cite{browne2011evolutionary} (Figure
 \input{figures/additionalsolidformations.tex}
 
 These additional formations do not have the advantage that they can be played in any direction like the formations in Figure \ref{fig:solidformations}. However, it is clear that formations that can be used to force the opponent to move are crucial in Yavalath.
+
+The formations are evaluated as presented in Table \ref{tab:evaluationsolidformations}.
+
+\input{figures/solidformationsevaluation.tex}
 
 \subsection{Centralisation}
 \label{-subsec:centralisation}
@@ -111,11 +115,11 @@ However, because of the swap rule, we remove the bonus for the central two hexag
 
 \subsection{Initiative}
 \label{-subsec:initiative}
-The last evaluation function principle proposed by \cite{Winands2004} is initiative. Obtaining the initiative in the game of Yavalath is useful for forcing moves by the opponent, thereby limiting his options and with that his ability to force moves for the AI player. Because of this the sooner, a move can be forced by the AI player, the better.
+The last evaluation function principle proposed by \cite{Winands2004} is initiative. Obtaining the initiative in the game of Yavalath is useful for forcing moves by the opponent, thereby limiting his options and with that his ability to force moves for the AI player. Because of this the sooner, a move can be forced by the AI player, the better. Therefore, when a move is forced by the opponent, the player gets a penalty of $50$ per forced move, but the evaluation score is increased with $200$ per move forced by the player during his last turn.
 
 \section{\texorpdfstring{$\boldsymbol{\alpha\beta}$}{alphabeta}-enhancements}
 \label{-sec:alphabeta-enhancements}%fixed
-In this section we describe a number of enhancements made to the general $\alpha\beta$-framework. These include \begin{enumerate*}\item move ordering, \item a transposition table, \item killer moves, \item null moves, \item quiescence search and \item the relative history heuristic\end{enumerate*}
+In this section we describe a number of enhancements made to the general $\alpha\beta$-framework. These include \begin{enumerate*}\item move ordering, \item a transposition table, \item killer moves, \item null moves, \item quiescence search, \item the relative history heuristic and \item aspiration search.\end{enumerate*}
 As a first remark, although the AI player will not participate in a tournament, it still makes use of iterative deepening in order to stay as close as possible to an AI player that could be used in a real game or tournament. Iterative deepening performs the same $\alpha\beta$-search for increasing depth, starting at depth $1$. The costs of the repeated search can be compensated by using a number of enhancements to increase the number of $\alpha\beta$-cutoffs when searching at increased depths, especially when using a transposition table.
 
 \subsection{Transposition Table}
@@ -146,10 +150,17 @@ Before moves are evaluated at a certain depth, the allowed moves are sorted. The
 
 Moves are considered in an outwards spiraling order, as playing near the center gives the player most opportunities to create strong positions.
 
+\subsection{Aspiration Search}
+\label{-subsec:aspirationsearch}
+The vanilla Negamax algorithm, starts the search with $\alpha$ and $\beta$ values of $-\infty$ and $+inf$ respectively. Aspiration search attempts to speed up the search by making a guess of what the true score of a position will be and limiting the search window accordingly. As the developed agent uses iterative deepening we can use the obtained score from the previous search as the initial guess for the next iteration. The search window is then set as $(V-\Delta, V+\Delta)$, where $V$ is the value of our initial guess and $\Delta$ is the search window size. $\Delta$ is the parameter that needs tuning and this is often done by trail and error. 
+
+The procedure is then started with a standard Negamax search, except using this limited window. If the resulting score is inside this window, we have obtained the result with very likely less explored nodes than with the standard window of $(-\infty,+\infty)$. However, if the score is lower than the lower bound of the window, \ie $score \leq \alpha$, the aspiration search failed low and the search is repeated with window $(-\infty,score)$. In the opposite case, when the score exceeds the upper bound of the search window, \ie $score > \beta$, the aspiration search failed high and we need to redo the search using the window $(score, +\infty)$.
+
+\
+
+
 \section{Acknowledgments}
 \label{-sec:acknowledgments}
-
-
 For displaying the board an existing display engine was used, published on Github by user silverio (\url{https://github.com/silverio/samples}).
 
 	\nocite{*}
