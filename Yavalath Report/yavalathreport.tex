@@ -50,6 +50,15 @@ Its simple set of rules and the unique winning condition is what Yavalath is mos
 
 Crucial for any AI player is a well-performing evaluation function. We discuss the Yavalath evaluation function according to seven principles as presented in \cite{Winands2004}. These seven principles include: \begin{enumerate*}\item threats, \item solid formations, \item mobility, \item blocking, \item centralisation, \item material advantage and \item initiative\end{enumerate*}.
 
+\subsection{Win or Loss}
+\label{-subsec:winorloss}
+First of all, if a board is a win or loss for the player, the evaluation of the board is given by:
+\begin{equation}\label{eq:winscore}
+score = \twopartdef{\phantom{-}WIN\ SCORE - \#\ of\ moves\ made}{\mbox{the position is a WIN}}{-WIN\ SCORE + \#\ of\ moves\ made}{\mbox{the position is a LOSS.}}
+\end{equation}
+
+With this game over evaluation score, we take into account the depth at which a win or loss was found. Obviously, obtaining a win sooner and delaying a loss as long as possible is preferable, so we subtract or add the number of moves made to the $WIN\ SCORE$ and the negative $WIN\ SCORE$ respectively.
+
 \subsection{Inapplicable evaluation function features}
 \label{-subsec:inapplicableevaluationfunctionfeatures}
 First we describe the features that are inapplicable for Yavalath and why that is the case.
@@ -60,13 +69,15 @@ As there are no restrictions where a player is able to move and pieces are not m
 
 \subsubsection{Material Advantage}
 \label{-subsubsec:materialadvantage}
-Another feature that is in inapplicable for Yavalath is material advantage. This is the case because pieces cannot be captured by other players. Therefore, the number of pieces on the board is equal to the number of moves made thus far and all players will have the same number of pieces on the board after a complete game round.
+Another feature that is in inapplicable for Yavalath is material advantage. This is the case because pieces cannot be captured by other players. Therefore, the number of pieces on the board is equal to the number of moves made thus far and all players will have the same number of pieces on the board after each complete game round.
 
 \subsection{Threats}
 \label{-subsec:threats}
 A returning aspect of Yavalath is forcing your opponent to make certain moves. In this way one is able to limit his opponents options. A formation that could lead to a forced move for the player can therefore be seen as a threat. This is the case when in any straight line of four fields, there are three pieces of the opponent's color and one free field in between (Figure \ref{fig:threat}).
 
 \input{figures/threat.tex}
+
+
 
 \subsection{Solid Formations}
 \label{-subsec:solidformations}
@@ -84,20 +95,27 @@ These additional formations do not have the advantage that they can be played in
 
 \subsection{Centralisation}
 \label{-subsec:centralisation}
-Another part of the evaluation function for the game of Yavalath is centralisation. The intuition behind this feature is that playing near the center of the board gives the player more options to choose from, \ie more directions to play in. Therefore we give all fields a score, based on the distance to the center. These scores are shown in Figure \ref{fig:scores}.
+Another part of the evaluation function for the game of Yavalath is centralisation. The intuition behind this feature is that playing near the center of the board gives the player more options to choose from, \ie more directions to play in. Therefore we give all fields a score, based on the distance to the edge of the board. These distances are shown in Figure \ref{fig:scores}. 
 
 \input{figures/scores.tex}
 
-However, because of the swap rulex, we remove the bonus for the central two hexagonal circles (all fields with scores of $40$ or $50$) for the first move if the AI player is White. This is to prevent the player from playing a move that will very likely be swapped during Black's first move anyway, thereby losing his first move advantage.
+The centralisation score is then defined as:
+
+\begin{equation}
+	centralisation\ score = distance \mydot distance\ score,
+\end{equation}
+
+where we set $distance\ score = 200$.
+
+However, because of the swap rulex, we remove the bonus for the central two hexagonal circles (all fields with distances of $4$ or $5$) for the first move if the AI player is White. This is to prevent the player from playing a move that will very likely be swapped during Black's first move anyway, thereby losing his first move advantage.
 
 \subsection{Initiative}
 \label{-subsec:initiative}
 The last evaluation function principle proposed by \cite{Winands2004} is initiative. Obtaining the initiative in the game of Yavalath is useful for forcing moves by the opponent, thereby limiting his options and with that his ability to force moves for the AI player. Because of this the sooner, a move can be forced by the AI player, the better.
 
 \section{\texorpdfstring{$\boldsymbol{\alpha\beta}$}{alphabeta}-enhancements}
-\label{-sec:alphabeta-enhancements}
+\label{-sec:alphabeta-enhancements}%fixed
 In this section we describe a number of enhancements made to the general $\alpha\beta$-framework. These include \begin{enumerate*}\item move ordering, \item a transposition table, \item killer moves, \item null moves, \item quiescence search and \item the relative history heuristic\end{enumerate*}
-
 As a first remark, although the AI player will not participate in a tournament, it still makes use of iterative deepening in order to stay as close as possible to an AI player that could be used in a real game or tournament. Iterative deepening performs the same $\alpha\beta$-search for increasing depth, starting at depth $1$. The costs of the repeated search can be compensated by using a number of enhancements to increase the number of $\alpha\beta$-cutoffs when searching at increased depths, especially when using a transposition table.
 
 \subsection{Transposition Table}
@@ -108,7 +126,7 @@ For this, a set of $3\times 61$ random numbers is used to create a zobirst hash-
 
 \subsection{Null Moves}
 \label{-subsec:nullmoves}
-The idea of null moves is that any position on which a player is able to forfeit a move and remains a strong position, will be an even stronger position when he would have made a move. In Yavalath, we do not allow null moves when a player is forced to make a move. Furthermore, we do not allow two consecutive null moves as this would allow the opponent in a lot of situations to create positions that leads to forced moves by the player. This does not help the search as it gives a pessimistic evaluation of the position under consideration.
+The idea of null moves is that any position on which a player is able to forfeit a move and remains a strong position, will be an even stronger position when he would have made a move. In Yavalath, we do not allow null moves when a player is forced to make a move. Furthermore, we do not allow two consecutive null moves as this would allow the opponent in a lot of situations to create positions that leads to forced moves by the player. This does not help the search as it gives a overly pessimistic evaluation of the position under consideration.
 
 \subsection{Relative History Heuristic}
 \label{-subsec:relativehistoryheuristic}
@@ -122,7 +140,7 @@ where the $hh\ score$ is the history heuristic score and $bf\ score$ is the butt
 
 \subsection{Move ordering}
 \label{-subsec:moveordering}
-Before moves are evaluated at a certain depth, the allowed moves are sorted. The goal of this move ordering is to achieve an $\alpha\beta$-cutoff as soon as possible. The sooner a cutoff is achieved, the more the search is sped up. Several techniques suggest good moves to try first at a certain depth, killer moves, principal variation search and transposition tables. Generally, if allowed null moves are tried first. Then, as this gives us the most reliable information, the retrieved move from the transposition table is performed, then the principal variation of the last iteration and finally the killer moves are played. Then the relative history heuristic can sort the remaining moves based on the number of times they appeared in the search. However, a static move ordering is used if this feature is disabled. This static move ordering is shown in Figure \ref{fig:staticmoveordering}.
+Before moves are evaluated at a certain depth, the allowed moves are sorted. The goal of this move ordering is to achieve an $\alpha\beta$-cutoff as soon as possible. The sooner a cutoff is achieved, the more the search is sped up. Several techniques suggest good moves to try first at a certain depth, killer moves, principal variation moves from previous searches and transposition tables. Generally, null moves are tried first if they are allowed. Then, as this gives us the most reliable information, the retrieved move from the transposition table is performed, then the principal variation of the last iteration and finally the killer moves are played. Then the relative history heuristic can sort the remaining moves based on the number of times they appeared in the search. However, a static move ordering is used if this feature is disabled. This static move ordering is shown in Figure \ref{fig:staticmoveordering}.
 
 \input{figures/moveordering.tex}
 
