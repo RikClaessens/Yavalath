@@ -15,7 +15,7 @@ import java.util.HashSet;
 /**
  * Created by rhmclaessens on 01-07-2014.
  */
-public class IDNegamax implements Player {
+public class AIPlayer implements Player {
 
     private int piece;
     private int opponentPiece;
@@ -37,6 +37,19 @@ public class IDNegamax implements Player {
     private static int TRIANGLE_OF_TWO_SCORE = 600;
     private static int TRIANGLE_OF_TWO_PENALTY = -900;
     private static int DISTANCE_SCORE = 200;
+
+    // Evaluation function related variables
+    public static final byte[] FIRST_MOVE_DISTANCES = {
+            0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,
+            0,0,0,4,4,0,0,0,0,
+            0,0,0,4,5,4,0,0,0,
+            0,0,0,4,4,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,
+            0,0,0,0,0,0,0,0,0,
+    };
 
     // Move Ordering related variables
     private boolean useMoveOrdering;
@@ -75,9 +88,14 @@ public class IDNegamax implements Player {
     private int hhIncrement = 1;
     private int bfIncrement = 1;
 
+    // Aspiration search related variables
+    private boolean useAspirationSearch;
+    private int aspirationWindow;
+    private int lastDepthScore;
+
     private static int WIN_THRESHOLD = WIN_SCORE - 100;
 
-    public IDNegamax(PlayerSettings playerSettings) {
+    public AIPlayer(PlayerSettings playerSettings) {
         this.piece = playerSettings.piece;
         this.opponentPiece = playerSettings.getOpponentPiece(piece);
         this.opponentPiece = piece == Board.WHITE ? Board.BLACK : Board.WHITE;
@@ -90,6 +108,8 @@ public class IDNegamax implements Player {
         this.useKillerMoves = playerSettings.useKillerMoves;
         this.numberOfKillerMoves = playerSettings.numberOfKillerMoves;
         this.useRelativeHistoryHeuristic = playerSettings.useRelativeHistoryHeuristic;
+        this.useAspirationSearch = playerSettings.useAspirationSearch;
+        this.aspirationWindow = playerSettings.aspirationWindow;
     }
 
     @Override
@@ -111,13 +131,38 @@ public class IDNegamax implements Player {
         int idBestMove = -1;
         for (int depth = 1; depth <= globalMaxDepth; depth++) {
             bestPVScore = Integer.MIN_VALUE;
-            int score = negamax(board, depth, -INF, INF, 1, depth);
+
+            int alpha = -INF;
+            int beta = INF;
+            if (useAspirationSearch && depth > 1) {
+                alpha = lastDepthScore - aspirationWindow;
+                beta = lastDepthScore + aspirationWindow;
+            }
+            int score = negamax(board, depth, alpha, beta, 1, depth);
             idBestMove = bestMove;
             System.out.println("Search depth [" + depth + "], best move: " + bestMove + " score: " + score + " # of nodes visited " + nodesVisited);
 //            System.out.println("Visited " + nodesVisited + " nodes");
-            if (score > WIN_THRESHOLD) {
+            if (score >= WIN_THRESHOLD) {
                 break;
             }
+            if (useAspirationSearch) {
+                if (score >= beta) {
+                    System.out.println("Fail high");
+                    alpha = score;
+                    beta = INF;
+                    score = negamax(board, depth, alpha, beta, 1, depth);
+                    idBestMove = bestMove;
+                    System.out.println("Redid search high [" + depth + "], best move: " + bestMove + " score: " + score + " # of nodes visited " + nodesVisited);
+                } else if (score <= alpha) {
+                    System.out.println("Fail low");
+                    alpha = -INF;
+                    beta = score;
+                    score = negamax(board, depth, alpha, beta, 1, depth);
+                    idBestMove = bestMove;
+                    System.out.println("Redid search low [" + depth + "], best move: " + bestMove + " score: " + score + " # of nodes visited " + nodesVisited);
+                }
+            }
+            lastDepthScore = score;
         }
         System.out.println("Selected move: " + idBestMove + ", # nodes: " + nodesVisited);
 
@@ -423,6 +468,9 @@ end procedure
                 if (Board.CELLS[i] == 0) {
                     continue;
                 } else if (board.fields[i].piece == piece) {
+                    if (board.movesMade[0] == i) {
+                        score -= FIRST_MOVE_DISTANCES[i] * DISTANCE_SCORE;
+                    }
                     score += Board.DISTANCES[i] * DISTANCE_SCORE;
                 }
                 // check for triangle of size four > strong position

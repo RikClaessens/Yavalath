@@ -13,10 +13,12 @@ public class PlayerSettings {
     public boolean useQuiescence;
     public boolean useKillerMoves;
     public boolean useRelativeHistoryHeuristic;
+    public boolean useAspirationSearch;
     public int nullMoveR;
     public int maxDepth;
     public int piece;
     public int numberOfKillerMoves;
+    public int aspirationWindow;
     public static int HUMAN = -1, IDNEGAMAX = 0, MINIMAX = 1;
 
     public int getOpponentPiece(int piece) {

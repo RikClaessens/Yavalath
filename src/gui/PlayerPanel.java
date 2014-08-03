@@ -3,8 +3,7 @@ package gui;
 import players.Human;
 import players.Player;
 import players.PlayerSettings;
-import players.ai.IDNegamax;
-import players.ai.MiniMax;
+import players.ai.AIPlayer;
 import util.Util;
 
 import javax.swing.*;
@@ -16,7 +15,7 @@ import java.awt.*;
  */
 public class PlayerPanel extends JPanel {
 
-    private String[] players = new String[]{"Human", "IDNegamax"};
+    private String[] players = new String[]{"Human", "AIPlayer"};
     private static int[] DEF_PLAYERS = new int[]{0, 1};
     private JComboBox comboPlayerList;
     private JCheckBox checkTT;
@@ -26,12 +25,15 @@ public class PlayerPanel extends JPanel {
     private JCheckBox checkQuiescence;
     private JCheckBox checkKillerMoves;
     private JCheckBox checkRelativeHistoryHeuristic;
+    private JCheckBox checkAspirationSearch;
     private JSpinner spinnerMaxDepth;
     private JSpinner spinnerNullMoveR;
     private JSpinner spinnerKillerMoves;
+    private JSpinner spinnerAspirationWindow;
     private static int DEF_MAX_DEPTH = 5;
     private static int DEF_NULL_MOVE_R = 2;
     private static int DEF_KILLER_MOVES= 3;
+    private static int DEF_ASPIRATION_WINDOW = 500;
     private static boolean DEF_USE_NULL_MOVE = false;
     private static boolean DEF_USE_QUIESCENE = true;
     private static boolean DEF_USE_KILLER_MOVES = true;
@@ -39,6 +41,7 @@ public class PlayerPanel extends JPanel {
     private static boolean DEF_USE_TT = true;
     private static boolean DEF_USE_MOVE_ORDERING = true;
     private static boolean DEF_USE_RELATIVE_HISTORY_HEURISTIC = true;
+    private static boolean DEF_USE_ASPIRATION_SEARCH = true;
     private int piece;
 
     public PlayerPanel(int piece) {
@@ -89,6 +92,15 @@ public class PlayerPanel extends JPanel {
 
         checkRelativeHistoryHeuristic = createCheckBox("Rel. His. Heuristic", DEF_USE_RELATIVE_HISTORY_HEURISTIC);
         add(checkRelativeHistoryHeuristic);
+
+        checkAspirationSearch = createCheckBox("Aspiration Search", DEF_USE_ASPIRATION_SEARCH);
+        add(checkAspirationSearch);
+
+        SpinnerModel aspirationWindowSpinnerModel = new SpinnerNumberModel(DEF_ASPIRATION_WINDOW, 1, 1000000, 1);
+        spinnerAspirationWindow = new JSpinner(aspirationWindowSpinnerModel);
+        add(new JLabel("Aspiration Window"));
+        add(spinnerAspirationWindow);
+        ((JSpinner.DefaultEditor) spinnerAspirationWindow.getEditor()).getTextField().setEditable(true);
     }
 
     public JCheckBox createCheckBox(String label, boolean defaultValue) {
@@ -115,12 +127,12 @@ public class PlayerPanel extends JPanel {
             playerSettings.nullMoveR = (Integer) spinnerNullMoveR.getValue();
             playerSettings.numberOfKillerMoves = (Integer) spinnerKillerMoves.getValue();
             playerSettings.useRelativeHistoryHeuristic = checkRelativeHistoryHeuristic.isSelected();
+            playerSettings.useAspirationSearch = checkAspirationSearch.isSelected();
+            playerSettings.aspirationWindow = (Integer) spinnerAspirationWindow.getValue();
 
             switch (comboPlayerList.getSelectedIndex()) {
                 case 1:
-                    player = new IDNegamax(playerSettings); break;
-                case 2:
-                    player = new MiniMax(playerSettings); break;
+                    player = new AIPlayer(playerSettings); break;
                 default:
                     player = new Human(); break;
             }
