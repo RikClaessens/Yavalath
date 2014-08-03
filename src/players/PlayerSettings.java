@@ -8,7 +8,7 @@ import game.Board;
 public class PlayerSettings {
     public boolean useTT;
     public boolean useMoveOrdering;
-    public boolean usePVS;
+    public boolean usePC;
     public boolean useNullMove;
     public boolean useQuiescence;
     public boolean useKillerMoves;

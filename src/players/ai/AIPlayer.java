@@ -20,10 +20,13 @@ public class AIPlayer implements Player {
     private int piece;
     private int opponentPiece;
     private int numberOfMovesMadeBeforeSearch;
-    private int bestMove = -1;
+    private int bestMove;
+    private int bestScore;
     private int globalMaxDepth;
 
     private int nodesVisited;
+    private long[] totalNodesVisited;
+    private int lastDepthNodesVisited;
 
     private static int INF = 2000000000;
 
@@ -34,9 +37,13 @@ public class AIPlayer implements Player {
     private static int FORCED_MOVES_PENALTY = 0;
     private static int CAN_FORCE_MOVE_SCORE = 200;
     private static int CAN_BE_FORCED_TO_MOVE_PENALTY = 0;
-    private static int TRIANGLE_OF_TWO_SCORE = 600;
+    private static int TRIANGLE_OF_TWO_SCORE = 300;
     private static int TRIANGLE_OF_TWO_PENALTY = -900;
     private static int DISTANCE_SCORE = 200;
+    private static int TRIANGLE_OF_THREE_SCORE = 400;
+    private static int TRIANGLE_OF_THREE_PENALTY = -500;
+    private static int TRIANGLE_OF_FOUR_SCORE = 300;
+    private static int TRIANGLE_OF_FOUR_PENALTY = -200;
 
     // Evaluation function related variables
     public static final byte[] FIRST_MOVE_DISTANCES = {
@@ -62,12 +69,12 @@ public class AIPlayer implements Player {
     // Principal variation related variables
     private int[][] principalVariationMoves;
     private int bestPVScore;
-    private boolean usePVS;
+    private boolean usePC;
 
     // TranspositionTable related variables
     private boolean useTT;
     private HashMap<Long, TTEntry> tt;
-    private static int TT_SIZE;
+    private static int TT_SIZE = 2^26;
 
     // Null move related variables
     private boolean useNullMove;
@@ -102,7 +109,7 @@ public class AIPlayer implements Player {
         this.globalMaxDepth = playerSettings.maxDepth;
         this.useMoveOrdering = playerSettings.useMoveOrdering;
         this.useTT = playerSettings.useTT;
-        this.usePVS = playerSettings.usePVS;
+        this.usePC = playerSettings.usePC;
         this.useNullMove = playerSettings.useNullMove;
         this.useQuiescence = playerSettings.useQuiescence;
         this.useKillerMoves = playerSettings.useKillerMoves;
@@ -110,6 +117,7 @@ public class AIPlayer implements Player {
         this.useRelativeHistoryHeuristic = playerSettings.useRelativeHistoryHeuristic;
         this.useAspirationSearch = playerSettings.useAspirationSearch;
         this.aspirationWindow = playerSettings.aspirationWindow;
+        this.totalNodesVisited = new long[this.globalMaxDepth + 1];
     }
 
     @Override
@@ -129,6 +137,9 @@ public class AIPlayer implements Player {
         bfScore = new int[Board.NUMBER_OF_CELLS];
 
         int idBestMove = -1;
+        bestMove = -1;
+        bestScore = -INF;
+        lastDepthNodesVisited = 0;
         for (int depth = 1; depth <= globalMaxDepth; depth++) {
             bestPVScore = Integer.MIN_VALUE;
 
@@ -163,10 +174,13 @@ public class AIPlayer implements Player {
                 }
             }
             lastDepthScore = score;
+            totalNodesVisited[depth] += nodesVisited - lastDepthNodesVisited;
+            lastDepthNodesVisited = nodesVisited;
         }
         System.out.println("Selected move: " + idBestMove + ", # nodes: " + nodesVisited);
 
         tt.clear();
+        totalNodesVisited[0] += nodesVisited;
         return idBestMove;
     }
 
@@ -246,9 +260,10 @@ public class AIPlayer implements Player {
             if (value > score) {
                 score = value;
                 // keep track of best move found so far
-                if (depth == currentMaxDepth) {
+                if (depth == currentMaxDepth && score > bestScore) {
 //                    System.out.println("\tNew best move " + child + " score " + score);
                     bestMove = child;
+                    bestScore = score;
                 }
             }
             if (score > alpha) {
@@ -363,7 +378,7 @@ public class AIPlayer implements Player {
                 }
             }
         }
-        if (currentMaxDepth - 2 >0 && currentMaxDepth - depth - 1 > 0) {
+        if (usePC && currentMaxDepth - 2 >0 && currentMaxDepth - depth - 1 > 0) {
             int bestMoveForDepth = principalVariationMoves[currentMaxDepth - 2][currentMaxDepth - depth - 1];
             if (bestMoveForDepth != 0 && allowedMoves.contains(bestMoveForDepth)) {
                 orderedMoves.add(bestMoveForDepth);
@@ -489,6 +504,20 @@ end procedure
                             && rowOfFour.fields[3].piece == opponentPiece) {
                         score += CAN_BE_FORCED_TO_MOVE_PENALTY;
                     }
+//                    if (rowOfFour.fields[0].position != i) {
+//                        continue;
+//                    }
+//                    if (rowOfFour.fields[0].piece == piece
+//                            && rowOfFour.fields[1].piece == Board.FREE
+//                            && rowOfFour.fields[2].piece == piece
+//                            && rowOfFour.fields[3].piece == Board.FREE) {
+//                        score += CAN_FORCE_MOVE_SCORE;
+//                    } else if (rowOfFour.fields[0].piece == opponentPiece
+//                            && rowOfFour.fields[1].piece == Board.FREE
+//                            && rowOfFour.fields[2].piece == opponentPiece
+//                            && rowOfFour.fields[3].piece == Board.FREE) {
+//                        score += CAN_BE_FORCED_TO_MOVE_PENALTY;
+//                    }
                 }
                 // check for triangles of size 2 > strong position
                 // 2 possible options:
@@ -528,9 +557,13 @@ end procedure
                 score += board.forcedMovesByBlack.size() * FORCED_MOVES_PENALTY;
             }
         }
-        if (score < -10000) {
+        if (score < -10000 && board.numberOfMovesMade -  numberOfMovesMadeBeforeSearch >=5) {
             return score;
         }
         return score;
+    }
+
+    public long[] getTotalNodesVisited() {
+        return totalNodesVisited;
     }
 }

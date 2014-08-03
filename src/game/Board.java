@@ -59,7 +59,7 @@ public class Board {
     // flag for game over
     public int gameWon = FREE;
     // players
-    Player[] players;
+    public Player[] players;
 
     // array for easily construction of neighboring fields, first index is the difference
     // in the CELLS array, second index is the difference in rows

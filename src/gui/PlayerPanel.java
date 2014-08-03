@@ -20,7 +20,7 @@ public class PlayerPanel extends JPanel {
     private JComboBox comboPlayerList;
     private JCheckBox checkTT;
     private JCheckBox checkMoveOrdering;
-    private JCheckBox checkPVS;
+    private JCheckBox checkPC;
     private JCheckBox checkNullMove;
     private JCheckBox checkQuiescence;
     private JCheckBox checkKillerMoves;
@@ -30,9 +30,9 @@ public class PlayerPanel extends JPanel {
     private JSpinner spinnerNullMoveR;
     private JSpinner spinnerKillerMoves;
     private JSpinner spinnerAspirationWindow;
-    private static int DEF_MAX_DEPTH = 5;
+    private static int DEF_MAX_DEPTH = 6;
     private static int DEF_NULL_MOVE_R = 2;
-    private static int DEF_KILLER_MOVES= 3;
+    private static int DEF_KILLER_MOVES= 2;
     private static int DEF_ASPIRATION_WINDOW = 500;
     private static boolean DEF_USE_NULL_MOVE = false;
     private static boolean DEF_USE_QUIESCENE = true;
@@ -66,8 +66,8 @@ public class PlayerPanel extends JPanel {
         checkMoveOrdering = createCheckBox("Move Ordering", DEF_USE_MOVE_ORDERING);
         add(checkMoveOrdering);
 
-        checkPVS = createCheckBox("PVS", DEF_USE_PVS);
-        add(checkPVS);
+        checkPC = createCheckBox("PVS", DEF_USE_PVS);
+        add(checkPC);
 
         checkQuiescence = createCheckBox("Quiescence", DEF_USE_QUIESCENE);
         add(checkQuiescence);
@@ -118,7 +118,7 @@ public class PlayerPanel extends JPanel {
             PlayerSettings playerSettings = new PlayerSettings();
             playerSettings.piece = piece;
             playerSettings.useTT = checkTT.isSelected();
-            playerSettings.usePVS = checkPVS.isSelected();
+            playerSettings.usePC = checkPC.isSelected();
             playerSettings.useMoveOrdering = checkMoveOrdering.isSelected();
             playerSettings.useQuiescence = checkQuiescence.isSelected();
             playerSettings.useKillerMoves = checkKillerMoves.isSelected();

@@ -5,6 +5,7 @@ import game.Board;
 import game.Field;
 import game.RowOfFour;
 import players.Player;
+import players.ai.AIPlayer;
 import util.Util;
 
 import javax.swing.*;
@@ -429,6 +430,24 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
 
     public void checkWhoWon() {
         String winMessage = "GAME OVER" + (board.isGameOver() ? "\t" + Util.piecePlayer(board.gameWon) + " won" : "");
+        if (board.players[Board.WHITE] instanceof AIPlayer) {
+            AIPlayer aiPlayer = (AIPlayer) board.players[Board.WHITE];
+            long[] nodesVisited = aiPlayer.getTotalNodesVisited();
+            System.out.println("White moves:");
+            for (int i = 1; i < nodesVisited.length; i++) {
+                System.out.println("Depth [" + i + "]: " + nodesVisited[i]);
+            }
+            System.out.println("Total # of moves: " + nodesVisited[0]);
+        }
+        if (board.players[Board.BLACK] instanceof AIPlayer) {
+            AIPlayer aiPlayer = (AIPlayer) board.players[Board.BLACK];
+            long[] nodesVisited = aiPlayer.getTotalNodesVisited();
+            System.out.println("Black moves:");
+            for (int i = 1; i < nodesVisited.length; i++) {
+                System.out.println("Depth [" + i + "]: " + nodesVisited[i]);
+            }
+            System.out.println("Total # of moves: " + nodesVisited[0]);
+        }
         System.out.println(winMessage);
         YavalathGui.log(winMessage);
     }

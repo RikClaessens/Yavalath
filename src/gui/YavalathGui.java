@@ -29,10 +29,11 @@ public class  YavalathGui extends JFrame implements MouseListener {
         final PlayerPanel playerPanelBlack = new PlayerPanel(Board.BLACK);
 
         JPanel settingsPanel = new JPanel();
-        settingsPanel.setLayout(new BoxLayout(settingsPanel, BoxLayout.Y_AXIS));
-        settingsPanel.add(playerPanelWhite);
-        settingsPanel.add(playerPanelBlack);
-        contentPane.add(settingsPanel);
+        JTabbedPane tabbedPane = new JTabbedPane();
+//        settingsPanel.setLayout(new BoxLayout(settingsPanel, BoxLayout.Y_AXIS));
+        tabbedPane.addTab("White", playerPanelWhite);
+        tabbedPane.addTab("Black", playerPanelBlack);
+        contentPane.add(tabbedPane);
 
         JButton btnNewGame = new JButton("New Game");
         btnNewGame.addActionListener(new ActionListener() {
@@ -55,7 +56,7 @@ public class  YavalathGui extends JFrame implements MouseListener {
         controlPanel.add(btnNewGame);
         controlPanel.add(btnUndoButton);
 
-        settingsPanel.add(controlPanel);
+        tabbedPane.add("Game", controlPanel);
 
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
