@@ -43,7 +43,7 @@ One of the key aspects of Yavalath is the forcing move. When a player has - in a
 
 \input{figures/forcedmoves.tex}
 
-Its simple set of rules and the unique winning condition is what Yavalath is most famous for and what made it one of the most popular board games on the website \url{www.boardgamegeek.com}. The game could also be played with three players where the only difference is that a player that makes a line of three leaves the game, after which the game is continued until a player wins by creating a line of four or by being the only remaining in the game. Furthermore, the active player is required to play any moves that would be part of a line of four if the part of a line of four during a subsequent move of the player that has this position.
+Its simple set of rules and the unique winning condition is what Yavalath is most famous for and what made it one of the most popular board games on the website \url{www.boardgamegeek.com}. The game could also be played with three players where the only difference is that a player that makes a line of three leaves the game, after which the game is continued until a player wins by creating a line of four or by being the only remaining in the game. Furthermore, the active player is required to play any moves that would be part of a line of four if the part of a line of four during a subsequent move of the player that has this position. In this report however, we only consider the two-player variant of Yavalath.
 
 \section{Evaluation Function}
 \label{-sec:evaluationfunction}
@@ -126,15 +126,15 @@ As a first remark, although the AI player will not participate in a tournament, 
 \label{-subsec:transpositiontable}
 In games where it is possible to obtain the same board position after different move sequences, it is possible to use a transposition table to speed up the search. This speed-up is achieved by storing already evaluated positions, along with the obtained value and the depth at which the position was evaluated. Then, when the position appears again while traversing the tree, the previously obtained result can be used if the remaining search depth is equal or smaller for the current position.
 
-For this, a set of $3\times 61$ random numbers is used to create a zobirst hash-value for a position. This hash is used to store and retrieve a transposition.
+For the transposition table, a set of $3\times 61$ random numbers is used to create a zobirst hash-value for a position. This hash is used to store and retrieve a transposition. When a collision occurs, the position which has been evaluated deeper, \ie the biggest subtree is maintained. The size of the transposition table is set to $2^{26}\approx 67$ million positions.
 
 \subsection{Null Moves}
 \label{-subsec:nullmoves}
-The idea of null moves is that any position on which a player is able to forfeit a move and remains a strong position, will be an even stronger position when he would have made a move. In Yavalath, we do not allow null moves when a player is forced to make a move. Furthermore, we do not allow two consecutive null moves as this would allow the opponent in a lot of situations to create positions that leads to forced moves by the player. This does not help the search as it gives a overly pessimistic evaluation of the position under consideration.
+The idea of null moves is that any position on which a player is able to forfeit a move and remains a strong position, will be an even stronger position when he would have made a move. In Yavalath, we do not allow null moves when a player is forced to make a move. Furthermore, we do not allow two consecutive null moves as this would allow the opponent in a lot of situations to create positions that leads to forced moves by the player. This does not help the search as it gives a overly pessimistic evaluation of the position under consideration. A value of $R=2$ is used for the reduced search depth after a null move has been made.
 
 \subsection{Relative History Heuristic}
 \label{-subsec:relativehistoryheuristic}
-Instead of a static move ordering, the relative history heuristic can be used. Simply said, the heuristic increases the score of each move that has produced a cut off and the number of times it didn't. The relative history heuristic now defines the score of a move as:
+Instead of a static move ordering, the relative history heuristic can be used. Simply said, the heuristic is a relative measure of the history score that counts the number of times a move has produced a cut-off and the butterfly score that counts the number of times a move did not result in a cut-off.The relative history heuristic defines the score of a move as:
 
 \begin{equation}
 	move\ score = \frac{hh\ score}{bf\ score},
@@ -156,7 +156,11 @@ The vanilla Negamax algorithm, starts the search with $\alpha$ and $\beta$ value
 
 The procedure is then started with a standard Negamax search, except using this limited window. If the resulting score is inside this window, we have obtained the result with very likely less explored nodes than with the standard window of $(-\infty,+\infty)$. However, if the score is lower than the lower bound of the window, \ie $score \leq \alpha$, the aspiration search failed low and the search is repeated with window $(-\infty,score)$. In the opposite case, when the score exceeds the upper bound of the search window, \ie $score > \beta$, the aspiration search failed high and we need to redo the search using the window $(score, +\infty)$.
 
-\
+\section{Experiments}
+\label{-sec:experiments}
+In order to test the performance of the developed AI player, a number of experiments were performed. Every $\alpha\beta$- enhancement is switched on individually to test the increase in performance. 
+
+The experiments were run a Macbook Pro (Early 2014) with a 2,4 GHz Intel Core i5 processor and 8GB of RAM.
 
 
 \section{Acknowledgments}
