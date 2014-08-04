@@ -153,7 +153,6 @@ public class AIPlayer implements Player {
         bestScore = -INF;
         long timeSearchStart = System.currentTimeMillis();
         for (int depth = 1; depth <= globalMaxDepth; depth++) {
-            nullExecuted = false;
             bestPVScore = Integer.MIN_VALUE;
 
             int alpha = -INF;
@@ -165,7 +164,6 @@ public class AIPlayer implements Player {
             int score = negamax(board, depth, alpha, beta, 1, depth);
             idBestMove = bestMove;
             System.out.println("Search depth [" + depth + "], best move: " + bestMove + " score: " + score + " # of nodes visited " + nodesVisited);
-            System.out.println("nullExecuted = " + nullExecuted);
 //            System.out.println("Visited " + nodesVisited + " nodes");
             if (score >= WIN_THRESHOLD) {
                 break;
@@ -204,7 +202,6 @@ public class AIPlayer implements Player {
         return false;
     }
 
-    boolean nullExecuted = false;
     public int negamax(Board board, int depth, int alpha, int beta, int color, int currentMaxDepth) {
         nodesVisited++;
         double alphaOriginal = alpha;
@@ -239,9 +236,6 @@ public class AIPlayer implements Player {
                     && board.numberOfMovesMade > 2
                     && board.allowedMovesForced()
                     && board.movesMade[board.numberOfMovesMade - 1] != -1) {
-                if (!nullExecuted) {
-                    nullExecuted = true;
-                }
                 board.doNullMove();
                 int value = -negamax(board, depth - nullMoveR - 1, -beta, -alpha, -color, currentMaxDepth);
                 board.undoNullMove();
