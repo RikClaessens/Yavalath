@@ -1,0 +1,24 @@
+% !TEX root = ../yavalathreport.tex
+\begin{table}[ht]
+\centering
+	\scalebox{.8}{
+		\begin{tabular}{|c|c|c|c|c|c|}
+			\hline
+			\multicolumn{6}{|c|}{\textbf{Minimax with $\bs{\alpha\beta}$-pruning}} \\
+			\multicolumn{6}{|c|}{\textbf{\& aspiration search}} \\
+			\hline
+			\multirow{2}{*}{Depth} & \multicolumn{5}{c|}{avg. \# of nodes} \\
+			\cline{2-6}
+			 & $\Delta=5$ & $\Delta=10$ & $\Delta=25$ & $\Delta=50$ & $\Delta=75$ \\
+			\hline
+			1 & \num{392} & \num{392} & \num{392} & \num{392} & \num{392} \\
+			2 & \num{1633} & \num{1633} & \num{1782} & \num{1897} & \num{2223} \\
+			3 & \num{65154} & \num65154 & \num{65404} & \num{69821} & \num{69952} \\
+			4 & \num{675357} & \num{675357} & \num{650301} & \num{677881} & \num{581155} \\
+			5 & \num{15419971} & \num{15419971} & \num{15928187} & \num{16240222} & \num{16244905} \\
+			\hline
+		\end{tabular}
+	}
+	\caption{The results of the aspiration search experiments}
+	\label{tab:aspirationtable}
+\end{table}

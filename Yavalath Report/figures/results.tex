@@ -1,7 +1,6 @@
 % !TEX root = ../yavalathreport.tex
 \begin{table}[ht]
 \centering
-	\captionsetup[subfloat]{captionskip=.5em}
 	\subfloat[]{
 		\scalebox{.8}{
 			\begin{tabular}{|c|c|c|}
@@ -85,19 +84,104 @@
 			\begin{tabular}{|c|c|c|c|}
 				\hline
 				\multicolumn{4}{|c|}{\textbf{Minimax with $\bs{\alpha\beta}$-pruning}} \\
+				\multicolumn{4}{|c|}{\textbf{\& move ordering}} \\
+				\hline
+				Depth & \# sec. & \# nodes & node \% reduction \\
+				\hline
+				1 & 0 & \num{392} & 0\% \\ 
+				2 & 0 & \num{2217} & 12\% \\ 
+				3 & 0 & \num{56006} & 13\% \\ 
+				4 & 2 & \num{563645} & 18\% \\ 
+				5 & 46 & \num{12739397} & 18\% \\ 
+				\hline
+			\end{tabular}
+		}
+	}
+	\captionsetup[subfloat]{captionskip=.5em}
+	\subfloat[]{
+		\scalebox{.8}{
+			\begin{tabular}{|c|c|c|c|}
+				\hline
+				\multicolumn{4}{|c|}{\textbf{Minimax with $\bs{\alpha\beta}$-pruning}} \\
 				\multicolumn{4}{|c|}{\textbf{\& relative history heuristic}} \\
 				\hline
 				Depth & \# sec. & \# nodes & node \% reduction \\
 				\hline
 				1 & 0 & \num{392} & 0\% \\ 
-				2 & 0 & \num{2704} & -7\% \\ 
+				2 & 0 & \num{2354} & 6\% \\ 
 				3 & 0 & \num{54914} & 15\% \\ 
-				4 & 1 & \num{255687} & 63\% \\ 
-				5 & 10 & \num{2663292} & 83\% \\ 
+				4 & 1 & \num{455687} & 34\% \\ 
+				5 & 10 & \num{7663292} & 51\% \\ 
 				\hline
 			\end{tabular}
 		}
-	}	
+	}
+
+	\captionsetup[subfloat]{captionskip=.5em}
+	\subfloat[]{
+		\scalebox{.8}{
+			\begin{tabular}{|c|c|c|c|}
+				\hline
+				\multicolumn{4}{|c|}{\textbf{Minimax with $\bs{\alpha\beta}$-pruning}} \\
+				\multicolumn{4}{|c|}{\textbf{\& move ordering \& transposition tables}} \\
+				\hline
+				Depth & \# sec. & \# nodes & node \% reduction \\
+				\hline
+				1 & 0 & \num{392} & 0\% \\ 
+				2 & 0 & \num{2217} & 12\% \\ 
+				3 & 0 & \num{56006} & 13\% \\ 
+				4 & 2 & \num{515545} & 25\% \\ 
+				5 & 33 & \num{8976613} & 42\% \\ 
+				\hline
+			\end{tabular}
+		}
+	}
+	\captionsetup[subfloat]{captionskip=.5em}
+	\subfloat[]{
+		\scalebox{.8}{
+			\begin{tabular}{|c|c|c|c|}
+				\hline
+				\multicolumn{4}{|c|}{\textbf{Minimax with $\bs{\alpha\beta}$-pruning}} \\
+				\multicolumn{4}{|c|}{\textbf{\& move ordering \& transposition tables \& null moves}} \\
+				\hline
+				Depth & \# sec. & \# nodes & node \% reduction \\
+				\hline
+				1 & 0 & \num{342} & 13\% \\ 
+				2 & 0 & \num{1863} & 26\% \\ 
+				3 & 0 & \num{46693} & 28\% \\ 
+				4 & 2 & \num{535954} & 22\% \\ 
+				5 & 33 & \num{8397340} & 46\% \\ 
+				\hline
+			\end{tabular}
+		}
+	}
 	\caption{The results of the experiments}
 	\label{tab:minimaxab}
+\end{table}
+
+\begin{table}[ht]
+\centering
+	\captionsetup[subfloat]{captionskip=.5em}
+		\subfloat[]{
+			\scalebox{.8}{
+				\begin{tabular}{|c|c|c|c|}
+					\hline
+					\multicolumn{4}{|c|}{\textbf{Minimax with $\bs{\alpha\beta}$-pruning}} \\
+					\multicolumn{4}{|c|}{\textbf{\& move ordering \& transposition tables \& null moves}} \\
+					\hline
+					Depth & \# sec. & \# nodes & node \% reduction \\
+					\hline
+					1 & 0 & \num{342} & 13\% \\ 
+					2 & 0 & \num{1610} & 36\% \\ 
+					3 & 0 & \num{47157} & 27\% \\ 
+					4 & 2 & \num{253753} & 63\% \\ 
+					5 & 33 & \num{3812228} & 75\% \\ 
+					6 & 71 & \num{10430973} & - \\ 
+					\hline
+				\end{tabular}
+			}
+		}
+	
+	\caption{The results of the experiments with all enhancements turned on}
+	\label{tab:minimaxabeverything}
 \end{table}
