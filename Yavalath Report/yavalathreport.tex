@@ -160,7 +160,14 @@ The procedure is then started with a standard Negamax search, except using this 
 \label{-sec:experiments}
 In order to test the performance of the developed AI player, a number of experiments were performed. Every $\alpha\beta$- enhancement is switched on individually to test the increase in performance. 
 
-The experiments were run a Macbook Pro (Early 2014) with a 2,4 GHz Intel Core i5 processor and 8GB of RAM.
+The experiments were run a Macbook Pro (Early 2014) with a 2,4 GHz Intel Core i5 processor and 8GB of RAM. The results are averages over a set of 10 fixed games. The average number of moves per fame is $11,9$.
+
+\input{figures/results.tex}
+
+We observed that occasionally, null moves caused an earlier win than the configuration without null moves. The null move evaluation thus sometimes might be too optimistic. However, we never observed a loss due to this. Therefore, performance 
+
+\section{Conclusions}
+\label{-sec:conclusions}
 
 
 \section{Acknowledgments}
