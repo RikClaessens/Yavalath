@@ -33,17 +33,17 @@ public class AIPlayer implements Player {
     // Evaluation Function Scores & Penalties
     private static int WIN_SCORE = 1000000;
     private static int LOSS_SCORE = -1000000;
-    private static int FORCED_MOVES_SCORE = 500;
+    private static int FORCED_MOVES_SCORE = 50;
     private static int FORCED_MOVES_PENALTY = 0;
-    private static int CAN_FORCE_MOVE_SCORE = 200;
-    private static int CAN_BE_FORCED_TO_MOVE_PENALTY = 0;
-    private static int TRIANGLE_OF_TWO_SCORE = 300;
-    private static int TRIANGLE_OF_TWO_PENALTY = -900;
-    private static int DISTANCE_SCORE = 200;
-    private static int TRIANGLE_OF_THREE_SCORE = 400;
-    private static int TRIANGLE_OF_THREE_PENALTY = -500;
-    private static int TRIANGLE_OF_FOUR_SCORE = 300;
-    private static int TRIANGLE_OF_FOUR_PENALTY = -200;
+    private static int CAN_FORCE_MOVE_SCORE = 20;
+    private static int CAN_BE_FORCED_TO_MOVE_PENALTY = 5;
+    private static int TRIANGLE_OF_TWO_SCORE = 30;
+    private static int TRIANGLE_OF_TWO_PENALTY = -90;
+    private static int DISTANCE_SCORE = 20;
+    private static int TRIANGLE_OF_THREE_SCORE = 40;
+    private static int TRIANGLE_OF_THREE_PENALTY = -50;
+    private static int TRIANGLE_OF_FOUR_SCORE = 30;
+    private static int TRIANGLE_OF_FOUR_PENALTY = -20;
 
     // Evaluation function related variables
     public static final byte[] FIRST_MOVE_DISTANCES = {
@@ -503,7 +503,7 @@ end procedure
             }
         } else {
             for (int i = 0; i < Board.NUMBER_OF_CELLS; i++) {
-                // playing near the center gives a small bonus in the early game, because there is more freedom
+                // playing near the center gives a bonus, because there is more freedom
                 if (Board.CELLS[i] == 0) {
                     continue;
                 } else if (board.fields[i].piece == piece) {
@@ -528,20 +528,6 @@ end procedure
                             && rowOfFour.fields[3].piece == opponentPiece) {
                         score += CAN_BE_FORCED_TO_MOVE_PENALTY;
                     }
-//                    if (rowOfFour.fields[0].position != i) {
-//                        continue;
-//                    }
-//                    if (rowOfFour.fields[0].piece == piece
-//                            && rowOfFour.fields[1].piece == Board.FREE
-//                            && rowOfFour.fields[2].piece == piece
-//                            && rowOfFour.fields[3].piece == Board.FREE) {
-//                        score += CAN_FORCE_MOVE_SCORE;
-//                    } else if (rowOfFour.fields[0].piece == opponentPiece
-//                            && rowOfFour.fields[1].piece == Board.FREE
-//                            && rowOfFour.fields[2].piece == opponentPiece
-//                            && rowOfFour.fields[3].piece == Board.FREE) {
-//                        score += CAN_BE_FORCED_TO_MOVE_PENALTY;
-//                    }
                 }
                 // check for triangles of size 2 > strong position
                 // 2 possible options:
@@ -580,9 +566,6 @@ end procedure
             } else {
                 score += board.forcedMovesByBlack.size() * FORCED_MOVES_PENALTY;
             }
-        }
-        if (score < -10000 && board.numberOfMovesMade -  numberOfMovesMadeBeforeSearch >=5) {
-            return score;
         }
         return score;
     }

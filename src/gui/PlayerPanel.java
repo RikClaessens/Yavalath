@@ -30,18 +30,18 @@ public class PlayerPanel extends JPanel {
     private JSpinner spinnerNullMoveR;
     private JSpinner spinnerKillerMoves;
     private JSpinner spinnerAspirationWindow;
-    private static int DEF_MAX_DEPTH = 5;
+    private static int DEF_MAX_DEPTH = 6;
     private static int DEF_NULL_MOVE_R = 2;
     private static int DEF_KILLER_MOVES= 2;
-    private static int DEF_ASPIRATION_WINDOW = 500;
+    private static int DEF_ASPIRATION_WINDOW = 10;
     private static boolean DEF_USE_NULL_MOVE = true;
     private static boolean DEF_USE_QUIESCENE = false;
-    private static boolean DEF_USE_KILLER_MOVES = false;
+    private static boolean DEF_USE_KILLER_MOVES = true;
     private static boolean DEF_USE_PVS = false;
-    private static boolean DEF_USE_TT = false;
-    private static boolean DEF_USE_MOVE_ORDERING = false;
-    private static boolean DEF_USE_RELATIVE_HISTORY_HEURISTIC = false;
-    private static boolean DEF_USE_ASPIRATION_SEARCH = false;
+    private static boolean DEF_USE_TT = true;
+    private static boolean DEF_USE_MOVE_ORDERING = true;
+    private static boolean DEF_USE_RELATIVE_HISTORY_HEURISTIC = true;
+    private static boolean DEF_USE_ASPIRATION_SEARCH = true;
     private int piece;
 
     public PlayerPanel(int piece) {
@@ -96,7 +96,7 @@ public class PlayerPanel extends JPanel {
         checkAspirationSearch = createCheckBox("Aspiration Search", DEF_USE_ASPIRATION_SEARCH);
         add(checkAspirationSearch);
 
-        SpinnerModel aspirationWindowSpinnerModel = new SpinnerNumberModel(DEF_ASPIRATION_WINDOW, 1, 1000000, 1);
+        SpinnerModel aspirationWindowSpinnerModel = new SpinnerNumberModel(DEF_ASPIRATION_WINDOW, 1, 1000000, 5);
         spinnerAspirationWindow = new JSpinner(aspirationWindowSpinnerModel);
         add(new JLabel("Aspiration Window"));
         add(spinnerAspirationWindow);

@@ -33,6 +33,7 @@ public class  YavalathGui extends JFrame implements MouseListener {
 //        settingsPanel.setLayout(new BoxLayout(settingsPanel, BoxLayout.Y_AXIS));
         tabbedPane.addTab("White", playerPanelWhite);
         tabbedPane.addTab("Black", playerPanelBlack);
+        tabbedPane.setSelectedIndex(1);
         contentPane.add(tabbedPane);
 
         JButton btnNewGame = new JButton("New Game");
@@ -85,6 +86,7 @@ public class  YavalathGui extends JFrame implements MouseListener {
         });
         pack();
         setBounds(100, 100, 800, getHeight());
+        setTitle("Yavalath");
     }
 
     public static void log(String log) {
