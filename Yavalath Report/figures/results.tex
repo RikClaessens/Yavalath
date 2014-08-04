@@ -11,11 +11,11 @@
 				\hline
 				Depth & \# sec. & avg. \# of nodes \\
 				\hline
-				1 & 0 & 392 \\ 
-				2 & 0 & 2517 \\
-				3 & 0 & 64574 \\
-				4 & 3 & 688570 \\
-				5 & 50 & 15481598 \\
+				1 & 0 & \num{392} \\ 
+				2 & 0 & \num{2517} \\
+				3 & 0 & \num{64574} \\
+				4 & 3 & \num{688570} \\
+				5 & 50 & \num{15481598} \\
 				\hline
 			\end{tabular}
 		}
@@ -30,11 +30,11 @@
 				\hline
 				Depth & \# sec. & \# nodes & node \% reduction \\
 				\hline
-				1 & 0 & 392 & 0\% \\ 
-				2 & 0 & 2517 & 0\% \\ 
-				3 & 0 & 64574 & 0\% \\ 
-				4 & 2 & 629538 & 2\% \\ 
-				5 & 36 & 11147239 & 36\% \\ 
+				1 & 0 & \num{392} & 0\% \\ 
+				2 & 0 & \num{2517}& 0\% \\ 
+				3 & 0 & \num{64574} & 0\% \\ 
+				4 & 2 & \num{629538} & 2\% \\ 
+				5 & 36 & \num{11147239} & 36\% \\ 
 				\hline
 			\end{tabular}
 		}
@@ -50,11 +50,11 @@
 				\hline
 				Depth & \# sec. & \# nodes & node \% reduction \\
 				\hline
-				1 & 0 & 342 & 13\% \\ 
-				2 & 0 & 2103 & 16\% \\ 
-				3 & 0 & 54421 & 16\% \\ 
-				4 & 3 & 714958 & -4\% \\ 
-				5 & 38 & 14307203 & 8\% \\ 
+				1 & 0 & \num{342} & 13\% \\ 
+				2 & 0 & \num{2103} & 16\% \\ 
+				3 & 0 & \num{54421} & 16\% \\ 
+				4 & 3 & \num{714958} & -4\% \\ 
+				5 & 38 & \num{14307203} & 8\% \\ 
 				\hline
 			\end{tabular}
 		}
@@ -69,16 +69,35 @@
 				\hline
 				Depth & \# sec. & \# nodes & node \% reduction \\
 				\hline
-				1 & 0 & 392 & 0\% \\ 
-				2 & 0 & 2521 & 0\% \\ 
-				3 & 0 & 64350 & 0\% \\ 
-				4 & 3 & 612866 & 11\% \\ 
-				5 & 48 & 13410065 & 13\% \\ 
+				1 & 0 & \num{392} & 0\% \\ 
+				2 & 0 & \num{2521} & 0\% \\ 
+				3 & 0 & \num{64350} & 0\% \\ 
+				4 & 3 & \num{612866} & 11\% \\ 
+				5 & 48 & \num{13410065} & 13\% \\ 
 				\hline
 			\end{tabular}
 		}
 	}
-	
+
+	\captionsetup[subfloat]{captionskip=.5em}
+	\subfloat[]{
+		\scalebox{.8}{
+			\begin{tabular}{|c|c|c|c|}
+				\hline
+				\multicolumn{4}{|c|}{\textbf{Minimax with $\bs{\alpha\beta}$-pruning}} \\
+				\multicolumn{4}{|c|}{\textbf{\& relative history heuristic}} \\
+				\hline
+				Depth & \# sec. & \# nodes & node \% reduction \\
+				\hline
+				1 & 0 & \num{392} & 0\% \\ 
+				2 & 0 & \num{2704} & -7\% \\ 
+				3 & 0 & \num{54914} & 15\% \\ 
+				4 & 1 & \num{255687} & 63\% \\ 
+				5 & 10 & \num{2663292} & 83\% \\ 
+				\hline
+			\end{tabular}
+		}
+	}	
 	\caption{The results of the experiments}
 	\label{tab:minimaxab}
 \end{table}
