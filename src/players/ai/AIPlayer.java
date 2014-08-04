@@ -26,7 +26,7 @@ public class AIPlayer implements Player {
 
     private int nodesVisited;
     private long[] totalNodesVisited;
-    private int lastDepthNodesVisited;
+    private long[] totalTimeNeeded;
 
     private static int INF = 2000000000;
 
@@ -118,6 +118,17 @@ public class AIPlayer implements Player {
         this.useAspirationSearch = playerSettings.useAspirationSearch;
         this.aspirationWindow = playerSettings.aspirationWindow;
         this.totalNodesVisited = new long[this.globalMaxDepth + 1];
+        this.totalTimeNeeded = new long[this.globalMaxDepth + 1];
+        this.nullMoveR = playerSettings.nullMoveR;
+        System.out.println("Initialized an AI player");
+        System.out.println("TT: " + useTT);
+        System.out.println("Null moves: " + useNullMove + " R = " + nullMoveR);
+        System.out.println("Quiescence: " + useQuiescence);
+        System.out.println("Killer moves: " + useKillerMoves + " # of killer moves = " + numberOfKillerMoves);
+        System.out.println("Relative History Heuristic: " + useRelativeHistoryHeuristic + " # of killer moves = " + numberOfKillerMoves);
+        System.out.println("Aspiration Search: " + useAspirationSearch + " aspiration window " + aspirationWindow);
+        System.out.println("Move ordering: " + useMoveOrdering);
+        System.out.println("Global max depth: " + globalMaxDepth);
     }
 
     @Override
@@ -136,11 +147,13 @@ public class AIPlayer implements Player {
         hhScore = new int[Board.NUMBER_OF_CELLS];
         bfScore = new int[Board.NUMBER_OF_CELLS];
 
+        // reset a number of variables to "start of search" values
         int idBestMove = -1;
         bestMove = -1;
         bestScore = -INF;
-        lastDepthNodesVisited = 0;
+        long timeSearchStart = System.currentTimeMillis();
         for (int depth = 1; depth <= globalMaxDepth; depth++) {
+            nullExecuted = false;
             bestPVScore = Integer.MIN_VALUE;
 
             int alpha = -INF;
@@ -152,6 +165,7 @@ public class AIPlayer implements Player {
             int score = negamax(board, depth, alpha, beta, 1, depth);
             idBestMove = bestMove;
             System.out.println("Search depth [" + depth + "], best move: " + bestMove + " score: " + score + " # of nodes visited " + nodesVisited);
+            System.out.println("nullExecuted = " + nullExecuted);
 //            System.out.println("Visited " + nodesVisited + " nodes");
             if (score >= WIN_THRESHOLD) {
                 break;
@@ -174,13 +188,14 @@ public class AIPlayer implements Player {
                 }
             }
             lastDepthScore = score;
-            totalNodesVisited[depth] += nodesVisited - lastDepthNodesVisited;
-            lastDepthNodesVisited = nodesVisited;
+            totalNodesVisited[depth] += nodesVisited;
+            totalTimeNeeded[depth] += System.currentTimeMillis() - timeSearchStart;
         }
         System.out.println("Selected move: " + idBestMove + ", # nodes: " + nodesVisited);
 
         tt.clear();
         totalNodesVisited[0] += nodesVisited;
+        totalTimeNeeded[0] += System.currentTimeMillis() - timeSearchStart;
         return idBestMove;
     }
 
@@ -189,6 +204,7 @@ public class AIPlayer implements Player {
         return false;
     }
 
+    boolean nullExecuted = false;
     public int negamax(Board board, int depth, int alpha, int beta, int color, int currentMaxDepth) {
         nodesVisited++;
         double alphaOriginal = alpha;
@@ -217,12 +233,17 @@ public class AIPlayer implements Player {
         if (useNullMove) {
             // do not use a null move when player is forced to play some moves, because this leads to instant loss
             // also do not allow 2 null moves follow each other
-            if (!board.allowedMovesForced()
+            if (depth >= nullMoveR + 1
+                    && currentMaxDepth >= 3
+                    && !board.isGameOver()
                     && board.numberOfMovesMade > 2
-                    && board.numberOfMovesMade > Board.NUMBER_OF_FIELDS
+                    && board.allowedMovesForced()
                     && board.movesMade[board.numberOfMovesMade - 1] != -1) {
+                if (!nullExecuted) {
+                    nullExecuted = true;
+                }
                 board.doNullMove();
-                int value = -negamax(board, depth - nullMoveR - 1, -beta, -beta + 1, -color, currentMaxDepth);
+                int value = -negamax(board, depth - nullMoveR - 1, -beta, -alpha, -color, currentMaxDepth);
                 board.undoNullMove();
                 if (value >= beta) {
                     return value;
@@ -231,7 +252,7 @@ public class AIPlayer implements Player {
         }
 
         // check if terminal node, i.e. game is won or maximum depth has been reached
-        if (board.isGameOver() || depth == 0) {
+        if (board.isGameOver() || depth <= 0) {
             int value;
             // Quiescence Search
             if (useQuiescence) {
@@ -248,7 +269,7 @@ public class AIPlayer implements Player {
         }
         // standard negamax
         int score = Integer.MIN_VALUE;
-        int[] moves = useMoveOrdering ? moveOrdering(currentMaxDepth - depth, board, currentMaxDepth) : board.getAllowedMoves();
+        int[] moves = moveOrdering(currentMaxDepth - depth, board, currentMaxDepth);
         for (int child : moves) {
             board.doMove(child);
 //            if (currentMaxDepth < 4)
@@ -289,7 +310,7 @@ public class AIPlayer implements Player {
             } else {
                 ttEntry.flag = TTEntry.EXACT;
             }
-            ttEntry.depth = depth - 1;
+            ttEntry.depth = depth;
             // replace if depth is greater
             if (tt.containsKey(board.hashKey)) {
                 if (board.numberOfMovesMade >= tt.get(board.hashKey).depth) {
@@ -377,7 +398,7 @@ public class AIPlayer implements Player {
         }
         HashSet<Integer> allowedMoves = new HashSet<>(board.getAllowedMoveSet());
         ArrayList<Integer> orderedMoves = new ArrayList<>();
-        if (killerMoves[depth] != null) {
+        if (useKillerMoves && killerMoves[depth] != null) {
             for (int killerMove : killerMoves[depth]) {
                 if (allowedMoves.contains(killerMove)) {
                     orderedMoves.add(killerMove);
@@ -385,7 +406,7 @@ public class AIPlayer implements Player {
                 }
             }
         }
-        if (usePC && currentMaxDepth - 2 >0 && currentMaxDepth - depth - 1 > 0) {
+        if (usePC && currentMaxDepth - 2 > 0 && currentMaxDepth - depth - 1 > 0) {
             int bestMoveForDepth = principalVariationMoves[currentMaxDepth - 2][currentMaxDepth - depth - 1];
             if (bestMoveForDepth != 0 && allowedMoves.contains(bestMoveForDepth)) {
                 orderedMoves.add(bestMoveForDepth);
@@ -408,13 +429,15 @@ public class AIPlayer implements Player {
                     allowedMoves.remove(sorted[i]);
                 }
             }
-        } else {
+        } else if (useMoveOrdering) {
             for (int move = 0; move < staticMoveOrder.length; move++) {
                 if (allowedMoves.contains(move)) {
                     orderedMoves.add(move);
                     allowedMoves.remove(move);
                 }
             }
+        } else {
+            orderedMoves.addAll(allowedMoves);
         }
         return Util.toIntArray(orderedMoves);
     }
@@ -572,5 +595,9 @@ end procedure
 
     public long[] getTotalNodesVisited() {
         return totalNodesVisited;
+    }
+
+    public long[] getTotalTimeNeeded() {
+        return totalTimeNeeded;
     }
 }

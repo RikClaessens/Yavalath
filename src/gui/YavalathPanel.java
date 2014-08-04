@@ -442,11 +442,12 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
         if (board.players[Board.BLACK] instanceof AIPlayer) {
             AIPlayer aiPlayer = (AIPlayer) board.players[Board.BLACK];
             long[] nodesVisited = aiPlayer.getTotalNodesVisited();
+            long[] timeNeeded = aiPlayer.getTotalTimeNeeded();
             System.out.println("Black moves:");
             for (int i = 1; i < nodesVisited.length; i++) {
-                System.out.println("Depth [" + i + "]: " + nodesVisited[i]);
+                System.out.println("Depth [" + i + "]:\t" + nodesVisited[i] + "\t\ttime:\t" + timeNeeded[i]);
             }
-            System.out.println("Total # of moves: " + nodesVisited[0]);
+            System.out.println("Total # of moves:\t" + nodesVisited[0] + "\t\ttime:\t" + timeNeeded[0]);
         }
         System.out.println(winMessage);
         YavalathGui.log(winMessage);

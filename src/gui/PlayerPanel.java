@@ -30,18 +30,18 @@ public class PlayerPanel extends JPanel {
     private JSpinner spinnerNullMoveR;
     private JSpinner spinnerKillerMoves;
     private JSpinner spinnerAspirationWindow;
-    private static int DEF_MAX_DEPTH = 6;
+    private static int DEF_MAX_DEPTH = 5;
     private static int DEF_NULL_MOVE_R = 2;
     private static int DEF_KILLER_MOVES= 2;
     private static int DEF_ASPIRATION_WINDOW = 500;
-    private static boolean DEF_USE_NULL_MOVE = false;
-    private static boolean DEF_USE_QUIESCENE = true;
-    private static boolean DEF_USE_KILLER_MOVES = true;
-    private static boolean DEF_USE_PVS = true;
-    private static boolean DEF_USE_TT = true;
-    private static boolean DEF_USE_MOVE_ORDERING = true;
-    private static boolean DEF_USE_RELATIVE_HISTORY_HEURISTIC = true;
-    private static boolean DEF_USE_ASPIRATION_SEARCH = true;
+    private static boolean DEF_USE_NULL_MOVE = true;
+    private static boolean DEF_USE_QUIESCENE = false;
+    private static boolean DEF_USE_KILLER_MOVES = false;
+    private static boolean DEF_USE_PVS = false;
+    private static boolean DEF_USE_TT = false;
+    private static boolean DEF_USE_MOVE_ORDERING = false;
+    private static boolean DEF_USE_RELATIVE_HISTORY_HEURISTIC = false;
+    private static boolean DEF_USE_ASPIRATION_SEARCH = false;
     private int piece;
 
     public PlayerPanel(int piece) {
