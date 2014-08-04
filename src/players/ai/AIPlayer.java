@@ -290,7 +290,14 @@ public class AIPlayer implements Player {
                 ttEntry.flag = TTEntry.EXACT;
             }
             ttEntry.depth = depth - 1;
-            tt.put(board.hashKey, ttEntry);
+            // replace if depth is greater
+            if (tt.containsKey(board.hashKey)) {
+                if (board.numberOfMovesMade >= tt.get(board.hashKey).depth) {
+                    tt.put(board.hashKey, ttEntry);
+                }
+            } else {
+                tt.put(board.hashKey, ttEntry);
+            }
         }
         return score;
     }
