@@ -1,15 +1,37 @@
 % !TEX root = ../yavalathreport.tex
 \begin{figure}[ht]
 	\centering{
-		\scalebox{\yavalathboardsize}{
-			\begin{tikzpicture}
-				\yavalathline{4}
-				\blackstone{1}{0};
-				\blackstone{2}{0};
-				\blackstone{4}{0};
-			\end{tikzpicture}
+		\captionsetup[subfloat]{captionskip=0em}
+		\subfloat[]{
+			\scalebox{\yavalathboardsize}{
+				\begin{tikzpicture}
+					\yavalathline{4}
+					\blackstone{1}{0};
+					\blackstone{4}{0};
+				\end{tikzpicture}
+			}
+		}
+		\captionsetup[subfloat]{captionskip=0em}
+		\subfloat[]{
+			\scalebox{\yavalathboardsize}{
+				\begin{tikzpicture}
+					\yavalathline{4}
+					\blackstone{1}{0};
+					\blackstone{2}{0};
+				\end{tikzpicture}
+			}
+		}
+		\captionsetup[subfloat]{captionskip=0em}
+		\subfloat[]{
+			\scalebox{\yavalathboardsize}{
+				\begin{tikzpicture}
+					\yavalathline{4}
+					\blackstone{1}{0};
+					\blackstone{3}{0};
+				\end{tikzpicture}
+			}
 		}
 	}
-	\caption{A formation that is a threat for White}
+	\caption{Formations that are a threat for White}
 	\label{fig:threat}
 \end{figure}

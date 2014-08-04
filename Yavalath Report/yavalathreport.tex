@@ -12,7 +12,7 @@
 \maketitle
 
 \begin{abstract}
-Yavalath is a board game created by a computer program called Ludi. This paper describes a Alpha-Beta implementation for the game of Yavalath. A number of enhancements over the vanilla $\alpha \beta$-framework and their impact on game playing performance is evaluated.
+Yavalath is a board game created by a computer program called Ludi. This paper describes an $\alpha\beta$-implementation for the game of Yavalath. A number of enhancements over the vanilla $\alpha \beta$-framework and their impact on game playing performance is evaluated.
 \end{abstract}
 
 \section{The Game of Yavalath}
@@ -35,15 +35,15 @@ Yavalath is played on board made up of a hexagonal grid of 61 cells. It is the f
 \label{lst:yavalathgdl}
 \listingspace
 
-As the game can be defined in just these few lines, the rules are very straightforward. The game is played with 2 player, White and Black and is played on a hexagonal shaped board of size 5 (Figure \ref{fig:emptyboard}). Allowed moves consist of placing a stone on one of the free cells remaining on the board. A player wins if he completes a line of four but loses if he completes a line of three before. The commonly used swap rule is also used in Yavalath in order to avoid a too strong opening move option for White. 
+As the game can be defined in just these few lines, the rules are very straightforward. The game is played with 2 players, White and Black, on a hexagonal shaped board of size 5 (Figure \ref{fig:emptyboard}). Allowed moves consist of placing a stone on one of the free cells remaining on the board. A player wins if he completes a line of four but loses if he completes a line of three before. The commonly used swap rule is also used in Yavalath in order to avoid a too strong opening move option for White. 
 
 \input{figures/emptyboard.tex}
 
-One of the key aspects of Yavalath is the forcing move. When a player has - in any direction - a line consisting of one stone of his color, one free cell and then another two stone of his color, he forces his opponent to play the move on the free field (or one of multiple fields with the same configuration). This is shown in Figure \ref{fig:forcedmoves}. By playing the move marked 1, White forces Black to play move 2 (forced moves are labeled in red), thereby forcing Black to create a line of three, which means that Black will lose. This mechanic will prove essential for the developed agent as by using forced moves it is possible to limit your opponents options and in a way controlling where he is able to make his next move.
+One of the key aspects of Yavalath is the forcing move. When a player has - in any direction - a line consisting of one stone of his color, one free cell and then another two stones of his color, he forces his opponent to play the move on the free field (or one of multiple fields with the same configuration). An example of a forced move is shown in Figure \ref{fig:forcedmoves}. By playing the move marked 1, White forces Black to play move 2 (forced moves are labeled in red), thereby forcing Black to create a line of three, which means that Black will lose. This mechanic will prove essential for the developed agent as by using forced moves it is possible to limit your opponents options and control where he is able to make his next move.
 
 \input{figures/forcedmoves.tex}
 
-Its simple set of rules and the unique winning condition is what Yavalath is most famous for and what made it one of the most popular board games on the website \url{www.boardgamegeek.com}. The game could also be played with three players where the only difference is that a player that makes a line of three leaves the game, after which the game is continued until a player wins by creating a line of four or by being the only remaining in the game. Furthermore, the active player is required to play any moves that would be part of a line of four if the part of a line of four during a subsequent move of the player that has this position. In this report however, we only consider the two-player variant of Yavalath.
+Its simple set of rules and the unique winning condition is what Yavalath is most famous for and what made it one of the most popular board games on the website \url{www.boardgamegeek.com}. The game could also be played with three players where the only difference is that a player that makes a line of three leaves the game, after which the game is continued until a player wins by creating a line of four or by being the only remaining in the game. Furthermore, the active player is required to play any forced moves by the previous player. In this report however, we only consider the two-player variant of Yavalath.
 
 \section{Evaluation Function}
 \label{-sec:evaluationfunction}
@@ -73,11 +73,11 @@ Another feature that is in inapplicable for Yavalath is material advantage. This
 
 \subsection{Threats}
 \label{-subsec:threats}
-A returning aspect of Yavalath is forcing your opponent to make certain moves. In this way one is able to limit his opponents options. A formation that could lead to a forced move for the player can therefore be seen as a threat. This is the case when in any straight line of four fields, there are three pieces of the opponent's color and one free field in between (Figure \ref{fig:threat}).
+A returning aspect of Yavalath is forcing your opponent to make certain moves. In this way one is able to limit his opponents options. A formation that could lead to a forced move for the player can therefore be seen as a threat. This is the case when in any straight line of four fields, there are two pieces of the opponent's color and two free fields. The three threat formations are shown in Figure \ref{fig:threat}, which can appear in multiple directions on the board. If the player does not play on one of the free fields, but the opponent does, White is forced to make a move.
 
 \input{figures/threat.tex}
 
-A threat is evaluated as a penalty of $5$. This value was chosen to not let this feature to become overly strong. As it is possible that being forced to move does not present any immediate danger for losing. It was observed that the developed AI player would start blocking off every threat there was, which lead him to ignore his own strong positions and this strategy would often result in a loss.
+A threat is evaluated as a penalty of $5$. This value was chosen to not let this feature to become overly strong, because it is not a direct distance to win indicator. This is the case because it is possible that being forced to move does not present any immediate danger for losing. It was observed that the developed AI player would start blocking off every existing threat, which lead him to ignore his own strong positions and a too high threat evaluation penalty would often result in a loss.
 
 \subsection{Solid Formations}
 \label{-subsec:solidformations}
@@ -85,19 +85,17 @@ There are a number of solid formations in the game of Yavalath. Forcing the oppo
 
 \input{figures/solidformations.tex}
 
-The strength of these triangle formation lies in the fact that they can be applied in two \emph{directions of play} and three \emph{rotations of play}. What we mean with this is that the first move can be played in two directions of each side of the triangle.
+The strength of these triangle formations lies in the fact that they can be applied in two \emph{directions of play} and three \emph{rotations of play}. What we mean with this is that the first move can be played in two directions of each side of the triangle. If the opponent thus blocks of one side of the triangle, the AI player still has various other options to make a move.
 
 In addition to the formations presented in \cite{browne2011evolutionary} (Figure \ref{fig:solidformations}), we would like to add several combinations of these triangles of size 2, 3 and 4. These formations, along with the winning move sequence are presented in Figure \ref{fig:additionalsolidformations}.
 
 \input{figures/additionalsolidformations.tex}
 
-These additional formations do not have the advantage that they can be played in any direction like the formations in Figure \ref{fig:solidformations}. However, it is clear that formations that can be used to force the opponent to move are crucial in Yavalath.
+These additional formations do not have the advantage that they can be played in any direction like the formations in Figure \ref{fig:solidformations}. However, it is clear that formations that pose a threat for the opponent and can be used to force him to move are crucial in Yavalath.
 
 The formations are evaluated as presented in Table \ref{tab:evaluationsolidformations}.
 
 \input{figures/solidformationsevaluation.tex}
-
-During game play testing, the play outs presented in Figure \ref{fig:solidformations} emerged. Due to the strength and lack of blocking options of the triangle of size two, the AI player often tried to obtain this position.
 
 \subsection{Centralisation}
 \label{-subsec:centralisation}
@@ -122,11 +120,11 @@ The last evaluation function principle proposed by \cite{Winands2004} is initiat
 \section{\texorpdfstring{$\boldsymbol{\alpha\beta}$}{alphabeta}-enhancements}
 \label{-sec:alphabeta-enhancements}%fixed
 In this section we describe a number of enhancements made to the general $\alpha\beta$-framework. These include \begin{enumerate*}\item move ordering, \item a transposition table, \item killer moves, \item null moves, \item quiescence search, \item the relative history heuristic and \item aspiration search.\end{enumerate*}
-As a first remark, although the AI player will not participate in a tournament, it still makes use of iterative deepening in order to stay as close as possible to an AI player that could be used in a real game or tournament. Iterative deepening performs the same $\alpha\beta$-search for increasing depth, starting at depth $1$. The costs of the repeated search can be compensated by using a number of enhancements to increase the number of $\alpha\beta$-cutoffs when searching at increased depths, especially when using a transposition table.
+As a first remark, although the AI player will not participate in a tournament, it still makes use of iterative deepening in order to stay as close as possible to an AI player that could be used in a real game or tournament. Iterative deepening performs the same $\alpha\beta$-search for increasing depth, starting at depth $1$. The costs of the repeated search can be compensated by using a number of enhancements to increase the number of $\alpha\beta$-cutoffs when searching at increased depths.
 
 \subsection{Transposition Table}
 \label{-subsec:transpositiontable}
-In games where it is possible to obtain the same board position after different move sequences, it is possible to use a transposition table to speed up the search. This speed-up is achieved by storing already evaluated positions, along with the obtained value and the depth at which the position was evaluated. Then, when the position appears again while traversing the tree, the previously obtained result can be used if the remaining search depth is equal or smaller for the current position.
+In games where it is possible to obtain the same board position after different move sequences, it is possible to use a transposition table to speed up the search. This speed-up is achieved by storing already evaluated positions, along with the obtained value, its flag (exact, upper bound or lower bound) and the depth at which the position was evaluated. Then, when the position appears again while traversing the tree, the previously obtained result can be used if the remaining search depth is equal or smaller for the current position.
 
 For the transposition table, a set of $3\times 61$ random numbers is used to create a zobirst hash-value for a position. This hash is used to store and retrieve a transposition. When a collision occurs, the position which has been evaluated deeper, \ie the biggest subtree is maintained. The size of the transposition table is set to $2^{26}\approx 67$ million positions.
 
@@ -136,13 +134,13 @@ The idea of null moves is that any position on which a player is able to forfeit
 
 \subsection{Relative History Heuristic}
 \label{-subsec:relativehistoryheuristic}
-Instead of a static move ordering, the relative history heuristic can be used \cite{Herik}. Simply said, the heuristic is a relative measure of the history score that counts the number of times a move has produced a cut-off and the butterfly score that counts the number of times a move did not result in a cut-off.The relative history heuristic defines the score of a move as:
+Instead of a static move ordering, the relative history heuristic can be used \cite{Herik}. The heuristic is a relative measure of the history score that counts the number of times a move has produced a cut-off and the butterfly score that counts the number of times a move did not result in a cut-off. The relative history heuristic defines the score of a move as:
 
 \begin{equation}
 	move\ score = \frac{hh\ score}{bf\ score},
 \end{equation}
 
-where the $hh\ score$ is the history heuristic score and $bf\ score$ is the butterfly score \cite{Winands2004}. As suggested in the same thesis, the $hh\ score$ and $bf\ score$ are both incremented by one in case of a cut-off and no cut-off respectively. This move ordering is used after the killer move and transposition table move have been evaluated.
+where the $hh\ score$ is the history heuristic score and $bf\ score$ is the butterfly score \cite{Winands2004}. As suggested in the same thesis, the $hh\ score$ and $bf\ score$ are both incremented by $1$ in case of a cut-off and no cut-off respectively. This move ordering is used after the killer move and transposition table move have been evaluated.
 
 \subsection{Move ordering}
 \label{-subsec:moveordering}
@@ -154,7 +152,7 @@ Moves are considered in an outwards spiraling order, as playing near the center 
 
 \subsection{Aspiration Search}
 \label{-subsec:aspirationsearch}
-The vanilla Negamax algorithm, starts the search with $\alpha$ and $\beta$ values of $-\infty$ and $+inf$ respectively. Aspiration search attempts to speed up the search by making a guess of what the true score of a position will be and limiting the search window accordingly. As the developed agent uses iterative deepening we can use the obtained score from the previous search as the initial guess for the next iteration. The search window is then set as $(V-\Delta, V+\Delta)$, where $V$ is the value of our initial guess and $\Delta$ is the search window size. $\Delta$ is the parameter that needs tuning and this is often done by trail and error. 
+The vanilla Negamax algorithm, starts the search with $\alpha$ and $\beta$ values of $-\infty$ and $+\infty$ respectively. Aspiration search attempts to speed up the search by making a guess of what the true score of a position will be and limiting the search window accordingly. As the developed agent uses iterative deepening we can use the obtained score from the previous search as the initial guess for the next iteration. The search window is then set as $(V-\Delta, V+\Delta)$, where $V$ is the value of our initial guess and $\Delta$ is the search window size. $\Delta$ is the parameter that needs tuning and this is often done by trail and error. 
 
 The procedure is then started with a standard Negamax search, except using this limited window. If the resulting score is inside this window, we have obtained the result with very likely less explored nodes than with the standard window of $(-\infty,+\infty)$. However, if the score is lower than the lower bound of the window, \ie $score \leq \alpha$, the aspiration search failed low and the search is repeated with window $(-\infty,score)$. In the opposite case, when the score exceeds the upper bound of the search window, \ie $score > \beta$, the aspiration search failed high and we need to redo the search using the window $(score, +\infty)$. A good value for $\Delta$ is investigated in the next section, where we discuss the experiments.
 
@@ -162,7 +160,7 @@ The procedure is then started with a standard Negamax search, except using this 
 \label{-sec:experiments}
 In order to test the performance of the developed AI player, a number of experiments were performed. Every $\alpha\beta$- enhancement is switched on individually to test the increase in performance. To compare the results, a search depth maximum of $5$ is chosen.
 
-The experiments were run a Macbook Pro (Early 2014) with a 2,4 GHz Intel Core i5 processor and 8GB of RAM. The results are averages over a set of 10 fixed games. The average number of moves per fame is $11,9$.
+The experiments were run a Macbook Pro (Early 2014) with a 2,4 GHz Intel Core i5 processor and 8GB of RAM. The results are averages over a set of fixed games against the standard Negamax player with no enhancements turned on. The average number of moves per fame is $11,9$.
 
 \subsection{Results}
 \label{-subsec:results}
@@ -173,17 +171,19 @@ A series of results is presented in Figures \ref{tab:minimaxab}, (a) through (h)
 
 The first thing that became clear during the experiments is that in the majority of the games, the game was won by forcing the opponent to create a line of three. A line of four in Yavalath is practically only achievable by having a formation where one piece is placed in such a way that it forces the opponent to move, but the opponent has two options to choose from. We never observed that the AI player was not able to block this formation attempt before it became a threat.
 
+During game play testing, it was observed that the play outs presented in Figure \ref{fig:solidformations} emerged naturally. Due to the strength and lack of blocking options of the triangle of size two, the AI player often tried to obtain this position.
+
 One of the most notable observations made during the experiments is that occasionally, null moves caused an earlier win than the configuration without null moves. This is the reason for the lower number of nodes in Figure \ref{tab:minimaxab}.(c) for depths $1$ and $2$. The null move evaluation thus sometimes might be too optimistic, thereby cutting off parts of the trees that would have been evaluated otherwise. In some occasions this lead to the player opening up to a series of forced moves from his opponent and sometimes this even lead to a loss for the AI player.
 
 We expect this to be caused by the nature of the game. Yavalath is a game where a player does not need to have an elaborate piece positioning to obtain a win. Generally, a win is obtained by a small number of pieces that form a solid formation with which the player is able to force a line of three by his opponent. Therefore, playing a null move might result in an overly optimistic value, when the search depth is reduced by $R=2$.
 
 \subsection{Move Ordering Experiments}
 \label{-subsec:moveorderingexperiments}
-We observe a huge increase in performance when using move ordering. Killer moves (Figure \ref{tab:minimaxab}.(d)), static move ordering (Figure \ref{tab:minimaxab}.(e)), as well as the relative history heuristic (Figure \ref{tab:minimaxab}.(f)) show a big number of nodes reduction. It is clear that in the game of Yavalath, fields with freedom to play in several directions are crucial for good performance. Based on these results, we can conclude that fields near the center of the board do not give the player a tactical advantage. 
+We observe a huge increase in performance when using move ordering. Killer moves (Figure \ref{tab:minimaxab}.(d)), static move ordering (Figure \ref{tab:minimaxab}.(e)), as well as the relative history heuristic (Figure \ref{tab:minimaxab}.(f)) show a big number of nodes reduction. It is clear that in the game of Yavalath, fields with freedom to play in several directions are crucial for good performance. Based on these results, we can conclude that fields near the center of the board give the player a big tactical advantage. 
 
 \subsection{Aspiration Search Experiments}
 \label{-subsec:aspirationsearchexperiments}
-In aspiration search, $\Delta$ is the parameter that needs tuning. This parameter determines the size of the window in which the true value of the negamax search is expected. Generally, a bigger $\Delta$ means a bigger chance that the true value is inside the window and thus less search repeats due to a high or low fail. However, a large value for $\Delta$ also means less cut-offs during the search. So we want to choose $\Delta$ as small as possible without leading to too much failures as this means repeating the search. In Figure \ref{tab:aspirationtable} we present the results of varying values for $\Delta$. It can be observed that the number of visited nodes for $\Delta=5$ and $\Delta=10$ are identical. This is because of the evaluation function, in which the feature scores where set to a multitude of ten.
+In aspiration search, $\Delta$ is the parameter that needs tuning. This parameter determines the size of the window in which the true value of the negamax search is expected. Generally, a bigger $\Delta$ means a bigger chance that the true value is inside the window and thus less search repeats due to a high or low fail. However, a large value for $\Delta$ also means less cut-offs during the search. So we want to choose $\Delta$ as small as possible without leading to too much failures as this means repeating the search. In Figure \ref{tab:aspirationtable} we present the results of varying values for $\Delta$.
 
 \input{figures/aspiration.tex}
 
@@ -193,12 +193,15 @@ We observe the biggest reduction in number of nodes visited for $\Delta=10$.
 \label{-sec:conclusions}
 From the experiments it is clear that the developed $\alpha\beta$-enhancements have a positive effect on the performance of the AI player. The biggest performance increase is obtained by a good move ordering as it is clear from the results presented in the previous section that the moves that give freedom in multiple directions are - especially in the early game - the moves to consider first. The AI player hardly ever plays near the edge of the board.
 
-Furthermore, as expected, transposition tables also result in a increase in performance. This is expected because a game tree for the game of Yavalath contains many transpositions due to the nature of the game, where no stones are captured but remain on the board after they have been placed. Also, since there are no restrictions in where a player is allowed to move, a transposition appears often in the search tree.
+Furthermore, as expected, transposition tables also result in a big increase in performance. This is expected because a game tree for the game of Yavalath contains many transpositions due to the nature of the game, where no stones are captured but remain on the board after they have been placed. Also, since there are no restrictions in where a player is allowed to move, a transposition appears often in the search tree.
+
+The AI player with all enhancements turned on achieves a $75\%$ reduction of the number of visited nodes on depth $5$ and is able to search a full ply deeper within reasonable amount of time, even at the start of the game.
 
 \section{Acknowledgments}
 \label{-sec:acknowledgments}
 For displaying the board an existing display engine was used, published on Github by user silverio (\url{https://github.com/silverio/samples}).
 
+\clearpage
 	\nocite{*}
 	\printbibliography
 	\Numbering{Roman}{1}

@@ -5,7 +5,7 @@
 		\scalebox{.8}{
 			\begin{tabular}{|c|c|c|}
 				\hline
-				\multicolumn{3}{|c|}{\textbf{Minimax with $\bs{\alpha\beta}$-pruning}} \\
+				\multicolumn{3}{|c|}{\textbf{Negamax with $\bs{\alpha\beta}$-pruning}} \\
 				\multicolumn{3}{|c|}{} \\
 				\hline
 				Depth & \# sec. & avg. \# of nodes \\
@@ -24,7 +24,7 @@
 		\scalebox{.8}{
 			\begin{tabular}{|c|c|c|c|}
 				\hline
-				\multicolumn{4}{|c|}{\textbf{Minimax with $\bs{\alpha\beta}$-pruning}} \\
+				\multicolumn{4}{|c|}{\textbf{Negamax with $\bs{\alpha\beta}$-pruning}} \\
 				\multicolumn{4}{|c|}{\textbf{\& transposition tables}} \\
 				\hline
 				Depth & \# sec. & \# nodes & node \% reduction \\
@@ -44,7 +44,7 @@
 		\scalebox{.8}{
 			\begin{tabular}{|c|c|c|c|}
 				\hline
-				\multicolumn{4}{|c|}{\textbf{Minimax with $\bs{\alpha\beta}$-pruning}} \\
+				\multicolumn{4}{|c|}{\textbf{Negamax with $\bs{\alpha\beta}$-pruning}} \\
 				\multicolumn{4}{|c|}{\textbf{\& null moves}} \\
 				\hline
 				Depth & \# sec. & \# nodes & node \% reduction \\
@@ -63,7 +63,7 @@
 		\scalebox{.8}{
 			\begin{tabular}{|c|c|c|c|}
 				\hline
-				\multicolumn{4}{|c|}{\textbf{Minimax with $\bs{\alpha\beta}$-pruning}} \\
+				\multicolumn{4}{|c|}{\textbf{Negamax with $\bs{\alpha\beta}$-pruning}} \\
 				\multicolumn{4}{|c|}{\textbf{\& killer moves}} \\
 				\hline
 				Depth & \# sec. & \# nodes & node \% reduction \\
@@ -83,7 +83,7 @@
 		\scalebox{.8}{
 			\begin{tabular}{|c|c|c|c|}
 				\hline
-				\multicolumn{4}{|c|}{\textbf{Minimax with $\bs{\alpha\beta}$-pruning}} \\
+				\multicolumn{4}{|c|}{\textbf{Negamax with $\bs{\alpha\beta}$-pruning}} \\
 				\multicolumn{4}{|c|}{\textbf{\& move ordering}} \\
 				\hline
 				Depth & \# sec. & \# nodes & node \% reduction \\
@@ -102,7 +102,7 @@
 		\scalebox{.8}{
 			\begin{tabular}{|c|c|c|c|}
 				\hline
-				\multicolumn{4}{|c|}{\textbf{Minimax with $\bs{\alpha\beta}$-pruning}} \\
+				\multicolumn{4}{|c|}{\textbf{Negamax with $\bs{\alpha\beta}$-pruning}} \\
 				\multicolumn{4}{|c|}{\textbf{\& relative history heuristic}} \\
 				\hline
 				Depth & \# sec. & \# nodes & node \% reduction \\
@@ -122,7 +122,7 @@
 		\scalebox{.8}{
 			\begin{tabular}{|c|c|c|c|}
 				\hline
-				\multicolumn{4}{|c|}{\textbf{Minimax with $\bs{\alpha\beta}$-pruning}} \\
+				\multicolumn{4}{|c|}{\textbf{Negamax with $\bs{\alpha\beta}$-pruning}} \\
 				\multicolumn{4}{|c|}{\textbf{\& move ordering \& transposition tables}} \\
 				\hline
 				Depth & \# sec. & \# nodes & node \% reduction \\
@@ -141,7 +141,7 @@
 		\scalebox{.8}{
 			\begin{tabular}{|c|c|c|c|}
 				\hline
-				\multicolumn{4}{|c|}{\textbf{Minimax with $\bs{\alpha\beta}$-pruning}} \\
+				\multicolumn{4}{|c|}{\textbf{Negamax with $\bs{\alpha\beta}$-pruning}} \\
 				\multicolumn{4}{|c|}{\textbf{\& move ordering \& transposition tables \& null moves}} \\
 				\hline
 				Depth & \# sec. & \# nodes & node \% reduction \\
@@ -160,28 +160,24 @@
 \end{table}
 
 \begin{table}[ht]
-\centering
-	\captionsetup[subfloat]{captionskip=.5em}
-		\subfloat[]{
-			\scalebox{.8}{
-				\begin{tabular}{|c|c|c|c|}
-					\hline
-					\multicolumn{4}{|c|}{\textbf{Minimax with $\bs{\alpha\beta}$-pruning}} \\
-					\multicolumn{4}{|c|}{\textbf{\& move ordering \& transposition tables \& null moves}} \\
-					\hline
-					Depth & \# sec. & \# nodes & node \% reduction \\
-					\hline
-					1 & 0 & \num{342} & 13\% \\ 
-					2 & 0 & \num{1610} & 36\% \\ 
-					3 & 0 & \num{47157} & 27\% \\ 
-					4 & 2 & \num{253753} & 63\% \\ 
-					5 & 33 & \num{3812228} & 75\% \\ 
-					6 & 71 & \num{10430973} & - \\ 
-					\hline
-				\end{tabular}
-			}
+	\centering
+		\scalebox{.8}{
+			\begin{tabular}{|c|c|c|c|}
+				\hline
+				\multicolumn{4}{|c|}{\textbf{Negamax with $\bs{\alpha\beta}$-pruning}} \\
+				\multicolumn{4}{|c|}{\textbf{\& all enhancements}} \\
+				\hline
+				Depth & \# sec. & \# nodes & node \% reduction \\
+				\hline
+				1 & 0 & \num{342} & 13\% \\ 
+				2 & 0 & \num{1610} & 36\% \\ 
+				3 & 0 & \num{47157} & 27\% \\ 
+				4 & 2 & \num{253753} & 63\% \\ 
+				5 & 33 & \num{3812228} & 75\% \\ 
+				6 & 71 & \num{10430973} & - \\ 
+				\hline
+			\end{tabular}
 		}
-	
 	\caption{The results of the experiments with all enhancements turned on}
 	\label{tab:minimaxabeverything}
 \end{table}
