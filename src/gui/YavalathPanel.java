@@ -5,7 +5,6 @@ import game.Board;
 import game.Field;
 import game.RowOfFour;
 import players.Player;
-import players.ai.AIPlayer;
 import util.Util;
 
 import javax.swing.*;
@@ -90,7 +89,6 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
         while (!board.isHumanMove() && !board.isGameOver()) {
             board.doTurn();
             this.paintImmediately(0, 0, this.getWidth(), this.getHeight());
-            YavalathGui.log((board.numberOfMovesMade % 2 == 1 ? "W" : "B") + ":\t" + board.movesMade[board.numberOfMovesMade - 1]);
         }
         if (board.isGameOver()) {
             checkWhoWon();
@@ -368,13 +366,10 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
             Polygon polygon = new Polygon(mCornersX, mCornersY, NUM_HEX_CORNERS);
             if (polygon.contains(e.getX(), e.getY())) {
                 board.doMove(i);
-                YavalathGui.log((board.numberOfMovesMade % 2 == 1 ? "W" : "B") + ":\t" + board.movesMade[board.numberOfMovesMade - 1]);
                 this.paintImmediately(0, 0, this.getWidth(), this.getHeight());
-                System.out.println(">>>> Move " + i + " game over = " + (board.isGameOver() ?  " player " + board.gameWon + " won." : ""));
                 if (!board.isGameOver()) {
                     if (!board.isHumanMove()) {
                         board.doTurn();
-                        YavalathGui.log((board.numberOfMovesMade % 2 == 1 ? "W" : "B") + ":\t" + board.movesMade[board.numberOfMovesMade - 1]);
                     }
                     if (board.isGameOver()) {
                         checkWhoWon();
@@ -430,26 +425,6 @@ public class YavalathPanel extends JPanel implements MouseListener, MouseMotionL
 
     public void checkWhoWon() {
         String winMessage = "GAME OVER" + (board.isGameOver() ? "\t" + Util.piecePlayer(board.gameWon) + " won" : "");
-        if (board.players[Board.WHITE] instanceof AIPlayer) {
-            AIPlayer aiPlayer = (AIPlayer) board.players[Board.WHITE];
-            long[] nodesVisited = aiPlayer.getTotalNodesVisited();
-            System.out.println("White moves:");
-            for (int i = 1; i < nodesVisited.length; i++) {
-                System.out.println("Depth [" + i + "]: " + nodesVisited[i]);
-            }
-            System.out.println("Total # of moves: " + nodesVisited[0]);
-        }
-        if (board.players[Board.BLACK] instanceof AIPlayer) {
-            AIPlayer aiPlayer = (AIPlayer) board.players[Board.BLACK];
-            long[] nodesVisited = aiPlayer.getTotalNodesVisited();
-            long[] timeNeeded = aiPlayer.getTotalTimeNeeded();
-            System.out.println("Black moves:");
-            for (int i = 1; i < nodesVisited.length; i++) {
-                System.out.println("Depth [" + i + "]:\t" + nodesVisited[i] + "\t\ttime:\t" + timeNeeded[i]);
-            }
-            System.out.println("Total # of moves:\t" + nodesVisited[0] + "\t\ttime:\t" + timeNeeded[0]);
-        }
         System.out.println(winMessage);
-        YavalathGui.log(winMessage);
     }
 }

@@ -89,11 +89,6 @@ public class  YavalathGui extends JFrame implements MouseListener {
         setTitle("Yavalath");
     }
 
-    public static void log(String log) {
-//        logPanel.log(log);
-//        logPanel.paintImmediately(0, 0, logPanel.getWidth(), logPanel.getHeight());
-    }
-
     private JPanel contentPane;
 
     /**

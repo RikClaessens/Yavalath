@@ -120,15 +120,6 @@ public class AIPlayer implements Player {
         this.totalNodesVisited = new long[this.globalMaxDepth + 1];
         this.totalTimeNeeded = new long[this.globalMaxDepth + 1];
         this.nullMoveR = playerSettings.nullMoveR;
-        System.out.println("Initialized an AI player");
-        System.out.println("TT: " + useTT);
-        System.out.println("Null moves: " + useNullMove + " R = " + nullMoveR);
-        System.out.println("Quiescence: " + useQuiescence);
-        System.out.println("Killer moves: " + useKillerMoves + " # of killer moves = " + numberOfKillerMoves);
-        System.out.println("Relative History Heuristic: " + useRelativeHistoryHeuristic + " # of killer moves = " + numberOfKillerMoves);
-        System.out.println("Aspiration Search: " + useAspirationSearch + " aspiration window " + aspirationWindow);
-        System.out.println("Move ordering: " + useMoveOrdering);
-        System.out.println("Global max depth: " + globalMaxDepth);
     }
 
     @Override
@@ -163,33 +154,26 @@ public class AIPlayer implements Player {
             }
             int score = negamax(board, depth, alpha, beta, 1, depth);
             idBestMove = bestMove;
-            System.out.println("Search depth [" + depth + "], best move: " + bestMove + " score: " + score + " # of nodes visited " + nodesVisited);
-//            System.out.println("Visited " + nodesVisited + " nodes");
             if (score >= WIN_THRESHOLD) {
                 break;
             }
             if (useAspirationSearch) {
                 if (score >= beta) {
-                    System.out.println("Fail high");
                     alpha = score;
                     beta = INF;
                     score = negamax(board, depth, alpha, beta, 1, depth);
                     idBestMove = bestMove;
-                    System.out.println("Redid search high [" + depth + "], best move: " + bestMove + " score: " + score + " # of nodes visited " + nodesVisited);
                 } else if (score <= alpha) {
-                    System.out.println("Fail low");
                     alpha = -INF;
                     beta = score;
                     score = negamax(board, depth, alpha, beta, 1, depth);
                     idBestMove = bestMove;
-                    System.out.println("Redid search low [" + depth + "], best move: " + bestMove + " score: " + score + " # of nodes visited " + nodesVisited);
                 }
             }
             lastDepthScore = score;
             totalNodesVisited[depth] += nodesVisited;
             totalTimeNeeded[depth] += System.currentTimeMillis() - timeSearchStart;
         }
-        System.out.println("Selected move: " + idBestMove + ", # nodes: " + nodesVisited);
 
         tt.clear();
         totalNodesVisited[0] += nodesVisited;
@@ -266,17 +250,12 @@ public class AIPlayer implements Player {
         int[] moves = moveOrdering(currentMaxDepth - depth, board, currentMaxDepth);
         for (int child : moves) {
             board.doMove(child);
-//            if (currentMaxDepth < 4)
-//                System.out.println(Util.getTabs(board.numberOfMovesMade - numberOfMovesMadeBeforeSearch) + "> " + child);
             int value = -negamax(board, depth - 1, -beta, -alpha, -color, currentMaxDepth);
-//            if (currentMaxDepth < 4)
-//                System.out.println(Util.getTabs(board.numberOfMovesMade - numberOfMovesMadeBeforeSearch) + "< " + child + " = " + value);
             board.undoMoveWithCheck(child);
             if (value > score) {
                 score = value;
                 // keep track of best move found so far
                 if (depth == currentMaxDepth && score > bestScore) {
-//                    System.out.println("\tNew best move " + child + " score " + score);
                     bestMove = child;
                     bestScore = score;
                 }
